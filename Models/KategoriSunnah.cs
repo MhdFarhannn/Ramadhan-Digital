@@ -1,0 +1,12 @@
+﻿namespace Ramadhan_Digital.Models
+{
+    public class KategoriSunnah
+    {
+        public int Id { get; set; }
+
+        public string Nama { get; set; }
+
+        public ICollection<IbadahSunnah> IbadahSunnahs { get; set; }
+    }
+
+}

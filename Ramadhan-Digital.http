@@ -1,0 +1,6 @@
+@Ramadhan_Digital_HostAddress = http://localhost:5037
+
+GET {{Ramadhan_Digital_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
