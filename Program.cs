@@ -1,18 +1,49 @@
+using Ramadhan_Digital.Services;
+using Ramadhan_Digital.Controllers;
+using Ramadhan_Digital.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+Env.Value = builder.Configuration;
+
+
+builder.Services.AddSingleton<Database>();
+builder.Services.AddScoped<AuthServices>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IJWTService, JWTService>();
+
+// JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = true;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = Env.Value["JWT:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = Env.Value["JWT:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Env.Value["JWT:Key"]!)),
+            ValidateLifetime = true
+        };
+    });
+
+builder.Services.AddAuthorization(options => Policies.Register(options));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapAuth();
 
 var summaries = new[]
 {
@@ -31,6 +62,7 @@ app.MapGet("/weatherforecast", () =>
         .ToArray();
     return forecast;
 })
+.RequireAuthorization()
 .WithName("GetWeatherForecast");
 
 app.Run();

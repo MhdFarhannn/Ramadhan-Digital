@@ -1,74 +1,112 @@
-﻿//using Backend.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using Ramadhan_Digital.Models;
 using Ramadhan_Digital.Services;
-using Microsoft.AspNetCore.Mvc;
-using Ramadhan_Digital.Services;
+using ModelRegisterRequest = Ramadhan_Digital.Models.RegisterRequest;
+using System.Security.Claims;
+using System.Linq;
 
 namespace Ramadhan_Digital.Controllers
 {
-    public class AuthController
+    public static class AuthController
     {
         public static void MapAuth(this WebApplication app)
         {
-            var group = app.MapGroup("/api/v1/auth");
+            var publicGroup = app.MapGroup("/api/v1/auth");
+            var adminGroup = app.MapGroup("/api/v1/auth").RequireAuthorization(Policies.Admin);
 
-            group.MapPost("/register", async (
-                [FromForm] RegisterRequest request,
+            publicGroup.MapPost("/register", async (
+                ModelRegisterRequest request,
                 AuthServices services,
-                IPasswordService pService,
+                IPasswordService passwordService,
                 IJWTService jwtService) =>
             {
-                if (await services.Registered())
+                // Cek apakah user sudah terdaftar
+                if (await services.IsRegistered())
                 {
-                    return Results.BadRequest("Registration Is Disabled.");
-                }
-                // Upload image
-                string imageUrl = "";
-
-                if (request.Image != null && request.Image.Length > 0)
-                {
-                    var uploadsFolder = Path.Combine(
-                        Directory.GetCurrentDirectory(),
-                        "wwwroot",
-                        "uploads");
-
-                    Directory.CreateDirectory(uploadsFolder);
-
-                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.Image.FileName)}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await request.Image.CopyToAsync(stream);
-
-                    imageUrl = fileName;
+                    return Results.BadRequest(new
+                    {
+                        message = "Registration is disabled."
+                    });
                 }
 
                 // Hash password
-                var hashedPassword = pService.HashPassword(request.Password);
+                var hashedPassword = passwordService.HashPassword(request.Password);
 
-                // Create user
                 var user = new User
                 {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Password = hashedPassword,
-                    ImageUrl = imageUrl
+                    IdRole = request.IdRole,
+                    IdKelas = request.IdKelas,
+                    Nama = request.Nama,
+                    Username = request.Username,
+                    Password = hashedPassword
                 };
 
-                // Save to database
+                // Simpan user
                 var result = await services.Register(user);
 
-                if (result == false)
+                if (!result)
                 {
-                    return Results.BadRequest("Register failed.");
+                    return Results.BadRequest(new
+                    {
+                        message = "Register failed."
+                    });
                 }
 
-                // Generate JWT
+                // Buat JWT
                 var token = jwtService.GenerateToken(user);
 
-                return Results.Ok();
+                return Results.Ok(new
+                {
+                    message = "Register success.",
+                    token
+                });
+
             }).DisableAntiforgery();
+
+            publicGroup.MapPost("/login", async (
+                LoginRequest request,
+                AuthServices services,
+                IPasswordService passwordService,
+                IJWTService jwtService) =>
+            {
+                // Ambil user berdasarkan username
+                var user = await services.Login(request.Username);
+
+                if (user == null)
+                {
+                    return Results.BadRequest(new { message = "Invalid username or password." });
+                }
+
+                // Verifikasi password
+                if (!passwordService.VerifyPassword(request.Password, user.Password))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var token = jwtService.GenerateToken(user);
+                var refresh = jwtService.GenerateRefreshToken();
+
+                var response = new LoginResponse
+                {
+                    Token = token,
+                    Username = user.Username,
+                    Nama = user.Nama,
+                    IdRole = user.IdRole,
+                    IdKelas = user.IdKelas ?? 0,
+                    RefreshToken = refresh
+                };
+
+                return Results.Ok(response);
+
+            }).DisableAntiforgery();
+
+            adminGroup.MapGet("/me", (ClaimsPrincipal user) =>
+            {
+                var username = user.Identity?.Name ?? string.Empty;
+                var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+                return Results.Ok(new { username, roles });
+            });
+
         }
-    }
-}
     }
 }
