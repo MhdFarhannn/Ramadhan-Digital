@@ -16,12 +16,12 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
 
-            string sql = @"
-                INSERT INTO users
-                (id_role, id_kelas, nama, username, password)
-                VALUES
-                (@IdRole, @IdKelas, @Nama, @Username, @Password);
-            ";
+                string sql = @"
+                    INSERT INTO users
+                    (id_role, id_kelas, nama, username, password)
+                    VALUES
+                    (@IdRole, @IdKelas, @Nama, @Username, @Password);
+                ";
 
             var result = await conn.ExecuteAsync(sql, user);
 

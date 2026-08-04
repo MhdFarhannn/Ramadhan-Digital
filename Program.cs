@@ -21,14 +21,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
+
+        // Read JWT values from nested Database:JWT section in appsettings.json
+        var jwtKey = Env.Value["Database:JWT:Key"];
+        var jwtIssuer = Env.Value["Database:JWT:Issuer"];
+        var jwtAudience = Env.Value["Database:JWT:Audience"];
+
+        if (string.IsNullOrWhiteSpace(jwtKey))
+        {
+            throw new InvalidOperationException("Database:JWT:Key configuration is missing. Set Database:JWT:Key in appsettings.json or environment variables.");
+        }
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = Env.Value["JWT:Issuer"],
+            ValidIssuer = jwtIssuer,
             ValidateAudience = true,
-            ValidAudience = Env.Value["JWT:Audience"],
+            ValidAudience = jwtAudience,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Env.Value["JWT:Key"]!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ValidateLifetime = true
         };
     });
@@ -37,8 +48,27 @@ builder.Services.AddAuthorization(options => Policies.Register(options));
 
 var app = builder.Build();
 
+// In development skip automatic HTTPS redirection to avoid "Failed to determine the https port" when
+// no HTTPS endpoint is configured. This makes testing with Postman easier on the HTTP URL.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+else
+{
+    Console.WriteLine("Development environment: skipping HTTPS redirection.");
+}
 
-app.UseHttpsRedirection();
+// Add a simple health endpoint to verify routing without authentication
+app.MapGet("/ping", () => Results.Ok("pong")).AllowAnonymous();
+
+// Log registered endpoints for easier troubleshooting
+var endpoints = app.Services.GetRequiredService<Microsoft.AspNetCore.Routing.EndpointDataSource>().Endpoints;
+Console.WriteLine("Registered endpoints:");
+foreach (var e in endpoints)
+{
+    Console.WriteLine(e.DisplayName ?? e.ToString());
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
