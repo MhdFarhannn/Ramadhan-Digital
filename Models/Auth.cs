@@ -22,8 +22,8 @@ namespace Ramadhan_Digital.Models
         public string Token { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Nama { get; set; } = string.Empty;
-        public int IdRole { get; set; }
-        public int IdKelas { get; set; }
+        public string Role { get; set; }
+        public string Kelas { get; set; }
         public string RefreshToken { get; set; } = string.Empty;
     }
 

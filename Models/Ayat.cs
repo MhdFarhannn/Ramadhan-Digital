@@ -1,19 +1,23 @@
-﻿namespace Ramadhan_Digital.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Ramadhan_Digital.Models
 {
     public class Ayat
     {
         public int Id { get; set; }
 
+        [JsonPropertyName("idSurah")]
         public int IdSurah { get; set; }
 
         public int Nomor { get; set; }
 
-        public string Arab { get; set; }
+        [JsonPropertyName("arab")]
+        public string? Arab { get; set; }
 
-        public string Terjemah { get; set; }
+        [JsonPropertyName("terjemah")]
+        public string? Terjemah { get; set; }
 
-
-        public Surah Surah { get; set; }
+        [JsonIgnore]
+        public Surah? Surah { get; set; }
     }
-
 }

@@ -14,6 +14,9 @@ builder.Services.AddSingleton<Database>();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IJWTService, JWTService>();
+builder.Services.AddScoped<SurahServices>();
+builder.Services.AddScoped<AyatServices>();
+
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -23,9 +26,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.SaveToken = true;
 
         // Read JWT values from nested Database:JWT section in appsettings.json
-        var jwtKey = Env.Value["Database:JWT:Key"];
-        var jwtIssuer = Env.Value["Database:JWT:Issuer"];
-        var jwtAudience = Env.Value["Database:JWT:Audience"];
+        var jwtKey = Env.Value["JWT:Key"];
+        var jwtIssuer = Env.Value["JWT:Issuer"];
+        var jwtAudience = Env.Value["JWT:Audience"];
 
         if (string.IsNullOrWhiteSpace(jwtKey))
         {
@@ -74,6 +77,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapAuth();
+app.MapSurahAyat();
 
 var summaries = new[]
 {

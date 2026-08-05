@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Ramadhan_Digital.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ramadhan_Digital.Services
 {
@@ -12,7 +13,7 @@ namespace Ramadhan_Digital.Services
             db = database;
         }
 
-        public async Task<bool> Register(User user)
+        public async Task<bool> RegisterAdmin(User user)
         {
             using var conn = db.Connect();
 
@@ -23,7 +24,14 @@ namespace Ramadhan_Digital.Services
                     (@IdRole, @IdKelas, @Nama, @Username, @Password);
                 ";
 
-            var result = await conn.ExecuteAsync(sql, user);
+            var result = await conn.ExecuteAsync(sql, new
+            {
+                IdRole = 1,
+                IdKelas =1,
+                Nama = user.Nama,
+                Username = user.Username,
+                Password = user.Password
+            });
 
             return result > 0;
         }
@@ -44,23 +52,16 @@ namespace Ramadhan_Digital.Services
             using var conn = db.Connect();
 
             string sql = @"
-        SELECT u.*, r.id, r.name
-        FROM users u
-        LEFT JOIN roles r ON u.id_role = r.id
-        WHERE u.username = @username";
+         SELECT u.id, u.nama AS Nama, u.username AS Username, u.password AS Password,
+        r.Name as Role,k.Nama as Kelas
+ FROM users u
+ JOIN role r ON u.id_role = r.id
+ JOIN kelas k ON u.id_kelas = k.id
+ WHERE u.username = @username
+";
 
-            var result = await conn.QueryAsync<User, Role, User>(
-                sql,
-                (u, r) =>
-                {
-                    u.Role = r;
-                    return u;
-                },
-                new { username },
-                splitOn: "id"
-            );
-
-            return result.FirstOrDefault();
+            var ReturnUser = await conn.QueryFirstOrDefaultAsync<User>(sql, new { username = username });
+            return ReturnUser;
         }
 
     }

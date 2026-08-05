@@ -14,7 +14,9 @@ namespace Ramadhan_Digital.Controllers
             var publicGroup = app.MapGroup("/api/v1/auth");
             var adminGroup = app.MapGroup("/api/v1/auth").RequireAuthorization(Policies.Admin);
 
-            publicGroup.MapPost("/register", async (
+
+
+            publicGroup.MapPost("/register-admin", async (
                 ModelRegisterRequest request,
                 AuthServices services,
                 IPasswordService passwordService,
@@ -44,7 +46,7 @@ namespace Ramadhan_Digital.Controllers
                     };
 
                     // Simpan user
-                    var result = await services.Register(user);
+                    var result = await services.RegisterAdmin(user);
 
                     if (!result)
                     {
@@ -79,17 +81,16 @@ namespace Ramadhan_Digital.Controllers
                 IPasswordService passwordService,
                 IJWTService jwtService) =>
             {
+                
+
                 try
                 {
                     // Ambil user berdasarkan username
                     var user = await services.Login(request.Username);
 
-                    if (user == null)
+                    if (string.IsNullOrEmpty(user.Password))
                     {
-                        return Results.BadRequest(new
-                        {
-                            message = "Invalid username or password."
-                        });
+                        return Results.Unauthorized();
                     }
 
                     // Verifikasi password
@@ -106,8 +107,8 @@ namespace Ramadhan_Digital.Controllers
                         Token = token,
                         Username = user.Username,
                         Nama = user.Nama,
-                        IdRole = user.IdRole,
-                        IdKelas = user.IdKelas ?? 0,
+                        Role = user.Role,
+                        Kelas = user.Kelas,
                         RefreshToken = refresh
                     };
 
@@ -115,10 +116,7 @@ namespace Ramadhan_Digital.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(
-                        title: "Internal Server Error",
-                        detail: ex.Message,
-                        statusCode: StatusCodes.Status500InternalServerError);
+                    return Results.InternalServerError(ex.Message);
                 }
 
             }).DisableAntiforgery();

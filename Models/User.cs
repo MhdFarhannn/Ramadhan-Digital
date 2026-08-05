@@ -10,10 +10,9 @@
         public string Nama { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string Role { get; set; }
+        public string Kelas { get; set; }
 
-
-        public Role Role { get; set; }
-        public Kelas Kelas { get; set; }
 
 
         public ICollection<Absensi> Absensis { get; set; }
@@ -27,6 +26,16 @@
         public ICollection<KegiatanUser> KegiatanUsers { get; set; }
 
         public ICollection<Tausiah> Tausiahs { get; set; }
+    }
+
+    public class UserDTO
+    {
+        public int Id { get; set; }
+        public string Role { get; set; }
+        public string Kelas { get; set; }
+        public string Nama { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
     }
 
 }

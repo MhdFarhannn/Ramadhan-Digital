@@ -4,7 +4,7 @@ namespace Ramadhan_Digital.Services
 {
     public class Database
     {
-        private readonly string _connectionString = Env.Value["Database:Database:connection"]!;
+        private readonly string _connectionString = Env.Value["Database:connection"]!;
 
         public NpgsqlConnection Connect()
         {

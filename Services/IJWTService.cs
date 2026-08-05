@@ -17,26 +17,17 @@ namespace Ramadhan_Digital.Services
         public string GenerateToken(User user)
         {
             var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Nama ?? "Unknown"),  // ✅ Fallback ke "Unknown"
+        new Claim(JwtRegisteredClaimNames.UniqueName, user.Username ?? ""),  // ✅ Fallback ke empty string
+        new Claim("IdRole", user.IdRole.ToString()),
+        new Claim("IdKelas", user.IdKelas?.ToString() ?? "")
+    };
+
+            if (!string.IsNullOrEmpty(user.Role))
             {
-                // ID User
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-
-                // Nama User
-                new Claim(ClaimTypes.Name, user.Nama),
-
-                // Username
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-
-                // Id Role
-                new Claim("IdRole", user.IdRole.ToString()),
-
-                // Id Kelas (jika ada)
-                new Claim("IdKelas", user.IdKelas?.ToString() ?? "")
-            };
-
-            if (!string.IsNullOrEmpty(user.Role?.Name))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, user.Role.Name));
+                claims.Add(new Claim(ClaimTypes.Role, user.Role));
             }
 
             var key = new SymmetricSecurityKey(
