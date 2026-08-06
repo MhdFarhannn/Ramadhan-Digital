@@ -4,6 +4,7 @@ using Ramadhan_Digital.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +15,10 @@ builder.Services.AddSingleton<Database>();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IJWTService, JWTService>();
+builder.Services.AddScoped<ExcelImportService>();
 builder.Services.AddScoped<SurahServices>();
 builder.Services.AddScoped<AyatServices>();
+builder.Services.AddScoped<DzikirServices>();
 
 
 // JWT Authentication
@@ -78,6 +81,32 @@ app.UseAuthorization();
 
 app.MapAuth();
 app.MapSurahAyat();
+app.MapDzikir();
+
+app.Use(async (context, next) =>
+{
+    var sw = Stopwatch.StartNew();
+
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex);
+        throw;
+    }
+    finally
+    {
+        sw.Stop();
+
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        Console.WriteLine(
+            $"INFO: {ip} - \"{context.Request.Method} {context.Request.Path} {context.Response.StatusCode}\" {sw.ElapsedMilliseconds}ms"
+        );
+    }
+});
 
 var summaries = new[]
 {

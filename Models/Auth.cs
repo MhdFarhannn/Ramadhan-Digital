@@ -31,6 +31,13 @@ namespace Ramadhan_Digital.Models
     {
         public string RefreshToken { get; set; } = string.Empty;
     }
+
+    public class ExcelImportResponse
+    {
+        public bool Success { get; set; }
+        public int ImportedCount { get; set; }
+        public List<string> Errors { get; set; } = new List<string>();
+        public string Message { get; set; } = string.Empty;
     }
 
 
@@ -46,4 +53,4 @@ namespace Ramadhan_Digital.Models
             );
         }
     }
-
+}

@@ -14,34 +14,24 @@ public static class SurahAyatController
         
 
 
-        // =========================
         // SURAH
-        // =========================
 
-        publicGroup.MapGet("/surah", GetAllSurah)
-            .WithName("GetAllSurah");
+        publicGroup.MapGet("/surah", GetAllSurah).WithName("GetAllSurah");
 
-        publicGroup.MapGet("/surah/{id:int}", GetSurahById)
-            .WithName("GetSurahById");
+        publicGroup.MapGet("/surah/{id:int}", GetSurahById).WithName("GetSurahById");
 
-        publicGroup.MapGet("/surah/nomor/{nomor:int}", GetSurahByNomor)
-            .WithName("GetSurahByNomor");
+        publicGroup.MapGet("/surah/nomor/{nomor:int}", GetSurahByNomor).WithName("GetSurahByNomor");
 
 
-        adminGroup.MapPost("/surah", CreateSurah)
-            .WithName("CreateSurah");
+        adminGroup.MapPost("/surah", CreateSurah).WithName("CreateSurah");
 
-        adminGroup.MapPut("/surah/{id:int}", UpdateSurah)
-            .WithName("UpdateSurah");
+        adminGroup.MapPut("/surah/{id:int}", UpdateSurah).WithName("UpdateSurah");
 
-        adminGroup.MapDelete("/surah/{id:int}", DeleteSurah)
-            .WithName("DeleteSurah");
+        adminGroup.MapDelete("/surah/{id:int}", DeleteSurah).WithName("DeleteSurah");
 
 
 
-        // =========================
         // AYAT
-        // =========================
 
         publicGroup.MapGet("/ayat", GetAllAyat)
             .WithName("GetAllAyat");
@@ -72,9 +62,8 @@ public static class SurahAyatController
 
 
 
-    // =========================
+
     // SURAH HANDLER
-    // =========================
 
     private static async Task<IResult> GetAllSurah(
         SurahServices service)
@@ -196,9 +185,7 @@ public static class SurahAyatController
 
 
 
-    // =========================
     // AYAT HANDLER
-    // =========================
 
     private static async Task<IResult> GetAllAyat(
         AyatServices service)

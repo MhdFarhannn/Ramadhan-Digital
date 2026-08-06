@@ -4,3 +4,45 @@ GET {{Ramadhan_Digital_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Test Registrasi Siswa via Excel
+### Endpoint: POST /api/v1/auth/register-bulk-excel-siswa?idKelas={id}
+### Memerlukan autentikasi dengan role Admin
+### IdRole di-hardcode = 3 (Santri)
+
+@host = https://localhost:5001
+@token = YOUR_JWT_TOKEN_HERE
+@idKelas = 1
+
+### Upload Excel file untuk registrasi siswa
+POST {{host}}/api/v1/auth/register-bulk-excel-siswa?idKelas={{idKelas}}
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary1234567890
+
+------FormBoundary1234567890
+Content-Disposition: form-data; name="file"; filename="siswa.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./siswa.xlsx
+------FormBoundary1234567890--
+
+###
+
+### Test Registrasi Guru via Excel
+### Endpoint: POST /api/v1/auth/register-bulk-excel-guru
+### Memerlukan autentikasi dengan role Admin
+### IdRole di-hardcode = 2 (Guru)
+
+### Upload Excel file untuk registrasi guru
+POST {{host}}/api/v1/auth/register-bulk-excel-guru
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary1234567890
+
+------FormBoundary1234567890
+Content-Disposition: form-data; name="file"; filename="guru.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./guru.xlsx
+------FormBoundary1234567890--
+
+###

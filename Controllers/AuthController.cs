@@ -121,6 +121,109 @@ namespace Ramadhan_Digital.Controllers
 
             }).DisableAntiforgery();
 
+            adminGroup.MapPost("/register-bulk-excel-siswa", async (
+                IFormFile file,
+                int idKelas,
+                ExcelImportService excelService) =>
+            {
+                try
+                {
+                    if (file == null || file.Length == 0)
+                    {
+                        return Results.BadRequest(new ExcelImportResponse
+                        {
+                            Success = false,
+                            Message = "File tidak ditemukan atau kosong"
+                        });
+                    }
+
+                    var allowedExtensions = new[] { ".xlsx", ".xls" };
+                    var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Results.BadRequest(new ExcelImportResponse
+                        {
+                            Success = false,
+                            Message = "Format file harus .xlsx atau .xls"
+                        });
+                    }
+
+                    using var stream = file.OpenReadStream();
+                    var (success, importedCount, errors) = await excelService.ImportSiswaFromExcel(stream, idKelas);
+
+                    var response = new ExcelImportResponse
+                    {
+                        Success = success,
+                        ImportedCount = importedCount,
+                        Errors = errors,
+                        Message = success
+                            ? $"Berhasil mengimpor {importedCount} siswa ke kelas {idKelas}"
+                            : "Gagal mengimpor data siswa dari Excel"
+                    };
+
+                    return success ? Results.Ok(response) : Results.BadRequest(response);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).DisableAntiforgery().WithName("ImportSiswaFromExcel");
+
+            adminGroup.MapPost("/register-bulk-excel-guru", async (
+                IFormFile file,
+                ExcelImportService excelService) =>
+            {
+                try
+                {
+                    if (file == null || file.Length == 0)
+                    {
+                        return Results.BadRequest(new ExcelImportResponse
+                        {
+                            Success = false,
+                            Message = "File tidak ditemukan atau kosong"
+                        });
+                    }
+
+                    var allowedExtensions = new[] { ".xlsx", ".xls" };
+                    var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Results.BadRequest(new ExcelImportResponse
+                        {
+                            Success = false,
+                            Message = "Format file harus .xlsx atau .xls"
+                        });
+                    }
+
+                    using var stream = file.OpenReadStream();
+                    var (success, importedCount, errors) = await excelService.ImportGuruFromExcel(stream);
+
+                    var response = new ExcelImportResponse
+                    {
+                        Success = success,
+                        ImportedCount = importedCount,
+                        Errors = errors,
+                        Message = success
+                            ? $"Berhasil mengimpor {importedCount} guru"
+                            : "Gagal mengimpor data guru dari Excel"
+                    };
+
+                    return success ? Results.Ok(response) : Results.BadRequest(response);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).DisableAntiforgery().WithName("ImportGuruFromExcel");
+
             adminGroup.MapGet("/me", (ClaimsPrincipal user) =>
             {
                 try
