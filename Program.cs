@@ -19,6 +19,11 @@ builder.Services.AddScoped<ExcelImportService>();
 builder.Services.AddScoped<SurahServices>();
 builder.Services.AddScoped<AyatServices>();
 builder.Services.AddScoped<DzikirServices>();
+builder.Services.AddScoped<KelasServices>();
+builder.Services.AddScoped<BacaanSholatServices>();
+builder.Services.AddScoped<KegiatanServices>();
+builder.Services.AddScoped<TausiahServices>();
+
 
 
 // JWT Authentication
@@ -82,6 +87,10 @@ app.UseAuthorization();
 app.MapAuth();
 app.MapSurahAyat();
 app.MapDzikir();
+app.MapKelas();
+app.MapBacaanSholat();
+app.MapKegiatan();
+app.MapTausiah();
 
 app.Use(async (context, next) =>
 {

@@ -10,8 +10,6 @@
 
         public string Nama { get; set; }
 
-        public bool Rukun { get; set; }
-
         public string Gerakan { get; set; }
 
         public string Arabic { get; set; }
