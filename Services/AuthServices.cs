@@ -64,5 +64,88 @@ namespace Ramadhan_Digital.Services
             return ReturnUser;
         }
 
+        public async Task<bool> RegisterUser(User user)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                INSERT INTO users
+                (id_role, id_kelas, nama, username, password)
+                VALUES
+                (@IdRole, @IdKelas, @Nama, @Username, @Password);
+            ";
+            var result = await conn.ExecuteAsync(sql, new
+            {
+                IdRole = 3,
+                IdKelas = user.IdKelas,
+                Nama = user.Nama,
+                Username = user.Username,
+                Password = user.Password
+            });
+            return result > 0;
+        }
+
+        public async Task<bool> registerGuru(User user)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                INSERT INTO users
+                (id_role, id_kelas, nama, username, password)
+                VALUES
+                (@IdRole, @IdKelas, @Nama, @Username, @Password);
+            ";
+            var result = await conn.ExecuteAsync(sql, new
+            {
+                IdRole = 2,
+                IdKelas = user.IdKelas,
+                Nama = user.Nama,
+                Username = user.Username,
+                Password = user.Password
+            });
+            return result > 0;
+        }
+
+        public async Task<bool> RegisterSiswa(User user)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+        INSERT INTO users
+        (id_role, id_kelas, nama, username, password)
+        VALUES
+        (@IdRole, @IdKelas, @Nama, @Username, @Password);
+    ";
+
+            var result = await conn.ExecuteAsync(sql, new
+            {
+                IdRole = 3, // Role ID untuk Siswa
+                IdKelas = user.IdKelas,
+                Nama = user.Nama,
+                Username = user.Username,
+                Password = user.Password
+            });
+
+            return result > 0;
+        }
+
+        public async Task<bool> RegisterGuru(User user)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+        INSERT INTO users
+        (id_role, id_kelas, nama, username, password)
+        VALUES
+        (@IdRole, @IdKelas, @Nama, @Username, @Password);
+    ";
+
+            var result = await conn.ExecuteAsync(sql, new
+            {
+                IdRole = 2, // Role ID untuk Guru
+                IdKelas = user.IdKelas,
+                Nama = user.Nama,
+                Username = user.Username,
+                Password = user.Password
+            });
+
+            return result > 0;
+        }
     }
 }

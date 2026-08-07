@@ -248,6 +248,86 @@ namespace Ramadhan_Digital.Controllers
                         statusCode: StatusCodes.Status500InternalServerError);
                 }
             });
+
+            adminGroup.MapPost("register-guru", async (
+                ModelRegisterRequest request,
+                AuthServices services,
+                IPasswordService passwordService) =>
+            {
+                try
+                {
+                    // Hash password
+                    var hashedPassword = passwordService.HashPassword(request.Password);
+                    var user = new User
+                    {
+                        IdRole = request.IdRole,
+                        IdKelas = request.IdKelas,
+                        Nama = request.Nama,
+                        Username = request.Username,
+                        Password = hashedPassword
+                    };
+                    // Simpan user
+                    var result = await services.RegisterGuru(user);
+                    if (!result)
+                    {
+                        return Results.BadRequest(new
+                        {
+                            message = "Register failed."
+                        });
+                    }
+                    return Results.Ok(new
+                    {
+                        message = "Register success."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).DisableAntiforgery().WithName("RegisterGuru");
+
+            adminGroup.MapPost("register-siswa", async (
+                ModelRegisterRequest request,
+                AuthServices services,
+                IPasswordService passwordService) =>
+            {
+                try
+                {
+                    // Hash password
+                    var hashedPassword = passwordService.HashPassword(request.Password);
+                    var user = new User
+                    {
+                        IdRole = request.IdRole,
+                        IdKelas = request.IdKelas,
+                        Nama = request.Nama,
+                        Username = request.Username,
+                        Password = hashedPassword
+                    };
+                    // Simpan user
+                    var result = await services.RegisterSiswa(user);
+                    if (!result)
+                    {
+                        return Results.BadRequest(new
+                        {
+                            message = "Register failed."
+                        });
+                    }
+                    return Results.Ok(new
+                    {
+                        message = "Register success."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).DisableAntiforgery().WithName("RegisterSiswa");
         }
     }
 }
