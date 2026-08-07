@@ -23,6 +23,7 @@ builder.Services.AddScoped<KelasServices>();
 builder.Services.AddScoped<BacaanSholatServices>();
 builder.Services.AddScoped<KegiatanServices>();
 builder.Services.AddScoped<TausiahServices>();
+builder.Services.AddScoped<SetoranHafalanServices>();
 
 
 
@@ -91,6 +92,7 @@ app.MapKelas();
 app.MapBacaanSholat();
 app.MapKegiatan();
 app.MapTausiah();
+app.MapSetoranHafalan();
 
 app.Use(async (context, next) =>
 {
