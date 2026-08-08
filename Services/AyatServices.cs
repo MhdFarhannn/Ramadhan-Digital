@@ -80,7 +80,7 @@ namespace Ramadhan_Digital.Services
         }
 
 
-        // GET AYAT BY SURAH AND NOMOR
+        // GET AYAT BY SURAH DAN NOMOR
         public async Task<Ayat?> GetBySurahAndNomorAsync(int idSurah, int nomor)
         {
             using var conn = db.Connect();

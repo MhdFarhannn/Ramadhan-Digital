@@ -12,7 +12,7 @@ namespace Ramadhan_Digital.Services
             db = database;
         }
 
-        // GET ALL SETORAN HAFALAN (Multi-mapping untuk Include Relation)
+        // GET ALL SETORAN HAFALAN 
         public async Task<IEnumerable<SetoranHafalan>> GetAllAsync()
         {
             using var conn = db.Connect();

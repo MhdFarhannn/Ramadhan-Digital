@@ -70,7 +70,6 @@ namespace Ramadhan_Digital.Services
         public async Task<bool> SaveIbadahHarianAsync(IbadahHarian ibadah)
         {
             using var conn = db.Connect();
-            // conn.Open(); <-- HAPUS / HILANGKAN BARIS INI
 
             using var transaction = conn.BeginTransaction();
 

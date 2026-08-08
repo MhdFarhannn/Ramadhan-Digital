@@ -21,7 +21,7 @@ namespace Ramadhan_Digital.Controllers
             [FromQuery] DateTime tanggal,
             IbadahHarianServices service)
         {
-            // Ambil idUser otomatis dari Claim JWT Token (support ClaimTypes.NameIdentifier & 'sub')
+            // Ambil idUser otomatis dari Claim JWT Token 
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value;
             if (!int.TryParse(userIdClaim, out int idUser))
             {

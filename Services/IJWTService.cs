@@ -19,8 +19,8 @@ namespace Ramadhan_Digital.Services
             var claims = new List<Claim>
     {
         new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.Nama ?? "Unknown"),  // ✅ Fallback ke "Unknown"
-        new Claim(JwtRegisteredClaimNames.UniqueName, user.Username ?? ""),  // ✅ Fallback ke empty string
+        new Claim(ClaimTypes.Name, user.Nama ?? "Unknown"),  
+        new Claim(JwtRegisteredClaimNames.UniqueName, user.Username ?? ""),
         new Claim("IdRole", user.IdRole.ToString()),
         new Claim("IdKelas", user.IdKelas?.ToString() ?? "")
     };

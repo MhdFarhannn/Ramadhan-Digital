@@ -19,10 +19,8 @@ namespace Ramadhan_Digital.Services
             this.passwordService = passwordService;
         }
 
-        /// <summary>
         /// Import siswa dari Excel. IdRole di-hardcode = 3 (Santri)
-        /// Excel format: Nama | Username | Password (kolom IdKelas tidak perlu, dari frontend)
-        /// </summary>
+        /// Excel format: Nama | Username | Password 
         public async Task<(bool success, int importedCount, List<string> errors)> ImportSiswaFromExcel(Stream excelStream, int idKelas)
         {
             var errors = new List<string>();
@@ -76,10 +74,8 @@ namespace Ramadhan_Digital.Services
             }
         }
 
-        /// <summary>
         /// Import guru dari Excel. IdRole di-hardcode = 2 (Guru)
         /// Excel format: Nama | Username | Password
-        /// </summary>
         public async Task<(bool success, int importedCount, List<string> errors)> ImportGuruFromExcel(Stream excelStream)
         {
             var errors = new List<string>();
@@ -133,9 +129,7 @@ namespace Ramadhan_Digital.Services
             }
         }
 
-        /// <summary>
         /// Parse siswa dari Excel row. IdRole dan IdKelas di-set otomatis
-        /// </summary>
         private User? ParseSiswaFromExcelRow(IXLRangeRow row, int rowNumber, int idKelas)
         {
             try
@@ -166,9 +160,7 @@ namespace Ramadhan_Digital.Services
             }
         }
 
-        /// <summary>
         /// Parse guru dari Excel row. IdRole di-set otomatis, IdKelas null
-        /// </summary>
         private User? ParseGuruFromExcelRow(IXLRangeRow row, int rowNumber)
         {
             try

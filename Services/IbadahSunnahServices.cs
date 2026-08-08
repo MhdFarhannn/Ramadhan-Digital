@@ -17,7 +17,6 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
 
-            // Perhatikan bagian ks.nama AS Nama
             string sql = @"
         SELECT 
             is_s.id AS Id,

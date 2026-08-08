@@ -72,7 +72,7 @@ namespace Ramadhan_Digital.Services
             return result > 0;
         }
 
-        // GET KEGIATAN USER BY USER ID (Menggunakan Dapper Multi-Mapping untuk include Kegiatan)
+        // GET KEGIATAN USER BY USER ID 
         public async Task<IEnumerable<KegiatanUser>> GetByUserIdAsync(int idUser)
         {
             using var conn = db.Connect();

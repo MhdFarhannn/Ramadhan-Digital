@@ -26,6 +26,7 @@ builder.Services.AddScoped<TausiahServices>();
 builder.Services.AddScoped<SetoranHafalanServices>();
 builder.Services.AddScoped<IbadahHarianServices>();
 builder.Services.AddScoped<IbadahSunnahServices>();
+builder.Services.AddScoped<AbsensiServices>();
 
 
 
@@ -97,6 +98,7 @@ app.MapTausiah();
 app.MapSetoranHafalan();
 app.MapIbadahHarian();
 app.MapIbadahSunnah();
+app.MapAbsensi();
 
 app.Use(async (context, next) =>
 {
