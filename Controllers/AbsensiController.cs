@@ -10,6 +10,8 @@ namespace Ramadhan_Digital.Controllers
         {
             var publicGroup = app.MapGroup("/api/v1/absensi").RequireAuthorization();
 
+            //----GURU----
+
             // GET: Guru mengambil daftar siswa + status absensi di kelas tertentu
             publicGroup.MapGet("/kelas/{idKelas:int}", GetAbsensiKelas)
                        .WithName("GetAbsensiKelas");

@@ -260,7 +260,7 @@ namespace Ramadhan_Digital.Controllers
                     var hashedPassword = passwordService.HashPassword(request.Password);
                     var user = new User
                     {
-                        IdRole = request.IdRole,
+                        IdRole = 2,
                         IdKelas = request.IdKelas,
                         Nama = request.Nama,
                         Username = request.Username,
@@ -300,7 +300,7 @@ namespace Ramadhan_Digital.Controllers
                     var hashedPassword = passwordService.HashPassword(request.Password);
                     var user = new User
                     {
-                        IdRole = request.IdRole,
+                        IdRole = 3,
                         IdKelas = request.IdKelas,
                         Nama = request.Nama,
                         Username = request.Username,
@@ -328,6 +328,58 @@ namespace Ramadhan_Digital.Controllers
                         statusCode: StatusCodes.Status500InternalServerError);
                 }
             }).DisableAntiforgery().WithName("RegisterSiswa");
+
+            adminGroup.MapDelete("/users/{id:int}", async (
+                int id,
+                AuthServices services) =>
+            {
+                try
+                {
+                    var result = await services.DeleteUser(id);
+                    if (!result)
+                    {
+                        return Results.NotFound(new
+                        {
+                            message = "User not found."
+                        });
+                    }
+                    return Results.Ok(new
+                    {
+                        message = "User deleted successfully."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).WithName("DeleteUser");
+
+            adminGroup.MapDelete("/users", async (
+                AuthServices services) =>
+            {
+                try
+                {
+                    var users = await services.GetUsers();
+                    if (users == null || !users.Any())
+                    {
+                        return Results.NotFound(new
+                        {
+                            message = "No users found."
+                        });
+                    }
+                    return Results.Ok(users);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).WithName("GetUsers");
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Ramadhan_Digital.Services
                     tempat_turun AS TempatTurun,
                     nomor AS Nomor
                 FROM surah
-                WHERE id = @Id
+                WHERE nomor = @Id
             ";
 
             return await conn.QueryFirstOrDefaultAsync<Surah>(

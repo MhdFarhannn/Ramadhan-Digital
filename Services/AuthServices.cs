@@ -147,5 +147,25 @@ namespace Ramadhan_Digital.Services
 
             return result > 0;
         }
+
+        public async Task<IEnumerable<UserDTO>> GetUsers()
+        {
+            using var conn = db.Connect();
+            string sql = @"
+        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas
+        FROM users u
+        LEFT JOIN role r ON u.id_role = r.id
+        LEFT JOIN kelas k ON u.id_kelas = k.id;
+    ";
+            return await conn.QueryAsync<UserDTO>(sql);
+        }
+
+        public async Task<bool> DeleteUser(int id)
+        {
+            using var conn = db.Connect();
+            string sql = "DELETE FROM users WHERE id = @id";
+            int result = await conn.ExecuteAsync(sql, new { id });
+            return result > 0;
+        }
     }
 }

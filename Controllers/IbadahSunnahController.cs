@@ -50,7 +50,7 @@ namespace Ramadhan_Digital.Controllers
             return Results.Ok(new { status = "success", message = "Ibadah sunnah berhasil disimpan" });
         }
 
-        // GET: Guru melihat ibadah sunnah milik santri tertentu
+        // GET: Guru melihat ibadah sunnah milik siswa tertentu
         private static async Task<IResult> GetSantriIbadahSunnahByGuru(
             int idSantri,
             [FromQuery] DateTime tanggal,

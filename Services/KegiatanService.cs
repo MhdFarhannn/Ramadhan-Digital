@@ -18,14 +18,14 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
             string sql = @"
-                SELECT 
-                    id AS Id,
-                    judul AS Judul,
-                    pemateri AS Pemateri,
-                    tanggal AS Tanggal
-                FROM kegiatan
-                ORDER BY tanggal DESC
-            ";
+        SELECT 
+            id AS Id,
+            judul AS Judul,
+            pemateri AS Pemateri,
+            tanggal::timestamp AS Tanggal -- Cast ke timestamp di sini
+        FROM kegiatan
+        ORDER BY tanggal DESC
+    ";
             return await conn.QueryAsync<Kegiatan>(sql);
         }
 
@@ -34,14 +34,14 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
             string sql = @"
-                SELECT 
-                    id AS Id,
-                    judul AS Judul,
-                    pemateri AS Pemateri,
-                    tanggal AS Tanggal
-                FROM kegiatan
-                WHERE id = @Id
-            ";
+        SELECT 
+            id AS Id,
+            judul AS Judul,
+            pemateri AS Pemateri,
+            tanggal::timestamp AS Tanggal -- Cast ke timestamp di sini
+        FROM kegiatan
+        WHERE id = @Id
+    ";
             return await conn.QueryFirstOrDefaultAsync<Kegiatan>(
                 sql,
                 new { Id = id }
@@ -102,6 +102,18 @@ namespace Ramadhan_Digital.Services
                 new { IdUser = idUser },
                 splitOn: "Id"
             );
+        }
+
+        //DELETE KEGIATAN BY ID
+        public async Task<bool> DeleteAsync(int id)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                DELETE FROM kegiatan
+                WHERE id = @Id
+            ";
+            var result = await conn.ExecuteAsync(sql, new { Id = id });
+            return result > 0;
         }
     }
 }

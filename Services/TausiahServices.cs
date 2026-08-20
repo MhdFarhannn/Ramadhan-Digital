@@ -35,7 +35,7 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
             string sql = @"
-                SELECT 
+                SELECT  
                     id AS Id,
                     id_user AS IdUser,
                     judul_tausiah AS JudulTausiah,

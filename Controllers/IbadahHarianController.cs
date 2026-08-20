@@ -11,7 +11,9 @@ namespace Ramadhan_Digital.Controllers
         {
             var publicGroup = app.MapGroup("/api/v1/ibadah-harian").RequireAuthorization();
 
+            //----GURU/SISWA----
             publicGroup.MapGet("/", GetIbadahByUserAndDate).WithName("GetIbadahByUserAndDate");
+            //----GURU/SISWA----
             publicGroup.MapPost("/", SaveIbadah).WithName("SaveIbadah");
         }
 

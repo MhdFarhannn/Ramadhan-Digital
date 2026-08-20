@@ -9,7 +9,15 @@ using System.Diagnostics;
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Value = builder.Configuration;
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAndroid", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddSingleton<Database>();
 builder.Services.AddScoped<AuthServices>();
@@ -100,9 +108,9 @@ app.MapIbadahHarian();
 app.MapIbadahSunnah();
 app.MapAbsensi();
 
+app.UseCors("AllowAndroid");
 app.Use(async (context, next) =>
-{
-    var sw = Stopwatch.StartNew();
+{    var sw = Stopwatch.StartNew();
 
     try
     {
@@ -119,31 +127,12 @@ app.Use(async (context, next) =>
 
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
+        var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         Console.WriteLine(
-            $"INFO: {ip} - \"{context.Request.Method} {context.Request.Path} {context.Response.StatusCode}\" {sw.ElapsedMilliseconds}ms"
+            $"{timestamp} INFO: {ip} - \"{context.Request.Method} {context.Request.Path} {context.Response.StatusCode}\" {sw.ElapsedMilliseconds}ms"
         );
     }
 });
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.RequireAuthorization()
-.WithName("GetWeatherForecast");
 
 app.Run();
 
