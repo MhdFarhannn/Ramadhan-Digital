@@ -2,7 +2,6 @@
 using Ramadhan_Digital.Models;
 using Ramadhan_Digital.Services;
 
-
 namespace Ramadhan_Digital.Controllers
 {
     public static class SetoranHafalanController
@@ -12,31 +11,15 @@ namespace Ramadhan_Digital.Controllers
             var publicGroup = app.MapGroup("/api/v1/setoran-hafalan").RequireAuthorization();
 
             publicGroup.MapGet("/", GetAllSetoran).WithName("GetAllSetoran");
-            publicGroup.MapGet("/{id:int}", GetSetoranById).WithName("GetSetoranById");
-            publicGroup.MapGet("/user/{idUser:int}", GetSetoranByUserId).WithName("GetSetoranByUserId");
             publicGroup.MapPost("/", CreateSetoran).WithName("CreateSetoran");
             publicGroup.MapPut("/{id:int}", UpdateSetoran).WithName("UpdateSetoran");
             publicGroup.MapDelete("/{id:int}", DeleteSetoran).WithName("DeleteSetoran");
+            publicGroup.MapGet("/kelas/{idKelas:int}", GetSetoranByKelasId).WithName("GetSetoranByKelasId");
         }
 
         private static async Task<IResult> GetAllSetoran(SetoranHafalanServices service)
         {
             var data = await service.GetAllAsync();
-            return Results.Ok(new { status = "success", data });
-        }
-
-        private static async Task<IResult> GetSetoranById(int id, SetoranHafalanServices service)
-        {
-            var data = await service.GetByIdAsync(id);
-            if (data == null)
-                return Results.NotFound(new { status = "error", message = "Data setoran tidak ditemukan" });
-
-            return Results.Ok(new { status = "success", data });
-        }
-
-        private static async Task<IResult> GetSetoranByUserId(int idUser, SetoranHafalanServices service)
-        {
-            var data = await service.GetByUserIdAsync(idUser);
             return Results.Ok(new { status = "success", data });
         }
 
@@ -65,6 +48,12 @@ namespace Ramadhan_Digital.Controllers
                 return Results.NotFound(new { status = "error", message = "Data setoran tidak ditemukan" });
 
             return Results.Ok(new { status = "success", message = "Setoran hafalan berhasil dihapus" });
+        }
+
+        private static async Task<IResult> GetSetoranByKelasId(int idKelas, SetoranHafalanServices service)
+        {
+            var data = await service.GetByKelasIdAsync(idKelas);
+            return Results.Ok(new { status = "success", data });
         }
     }
 }

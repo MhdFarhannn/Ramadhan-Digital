@@ -18,17 +18,17 @@ namespace Ramadhan_Digital.Services
             using var conn = db.Connect();
 
             string sql = @"
-                SELECT 
+                SELECT
                     u.id AS IdUser,
-                    u.nama_lengkap AS NamaSiswa,
+                    u.nama AS NamaSiswa,
                     @Tanggal::date AS Tanggal,
                     COALESCE(sa.nama, 'Belum Absen') AS StatusAbsensi,
                     COALESCE(a.id_status_absensi, 0) AS IdStatusAbsensi
                 FROM users u
                 LEFT JOIN absensi a ON u.id = a.id_user AND a.tanggal = @Tanggal::date
                 LEFT JOIN status_absensi sa ON a.id_status_absensi = sa.id
-                WHERE u.id_kelas = @IdKelas AND u.id_role = 2
-                ORDER BY u.nama_lengkap ASC;
+                WHERE u.id_kelas = @IdKelas AND u.id_role = 3
+                ORDER BY u.nama ASC;
             ";
 
             return await conn.QueryAsync(sql, new { IdKelas = idKelas, Tanggal = tanggal.Date });
@@ -56,8 +56,8 @@ namespace Ramadhan_Digital.Services
                     {
                         // Update
                         string updateSql = @"
-                            UPDATE absensi 
-                            SET id_status_absensi = @IdStatusAbsensi 
+                            UPDATE absensi
+                            SET id_status_absensi = @IdStatusAbsensi
                             WHERE id = @Id;";
 
                         await conn.ExecuteAsync(

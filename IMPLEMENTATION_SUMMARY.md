@@ -54,7 +54,7 @@ Buat file Excel (.xlsx) dengan struktur:
 - **Nama**: Nama lengkap (wajib)
 - **Username**: Username unik (wajib)
 - **Password**: Password awal (wajib)
-- **IdRole**: 1=Admin, 2=Guru, 3=Santri (wajib)
+- **IdRole**: 1=Admin, 2=Guru, 3=Siswa (wajib)
 - **IdKelas**: ID Kelas (opsional)
 
 ### API Endpoint

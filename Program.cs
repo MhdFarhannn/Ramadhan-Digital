@@ -35,6 +35,7 @@ builder.Services.AddScoped<SetoranHafalanServices>();
 builder.Services.AddScoped<IbadahHarianServices>();
 builder.Services.AddScoped<IbadahSunnahServices>();
 builder.Services.AddScoped<AbsensiServices>();
+builder.Services.AddScoped<StatusServices>();
 
 
 
@@ -107,6 +108,7 @@ app.MapSetoranHafalan();
 app.MapIbadahHarian();
 app.MapIbadahSunnah();
 app.MapAbsensi();
+app.MapStatus();
 
 app.UseCors("AllowAndroid");
 app.Use(async (context, next) =>

@@ -21,3 +21,6 @@ namespace Ramadhan_Digital.Models
         public Surah? Surah { get; set; }
     }
 }
+
+
+

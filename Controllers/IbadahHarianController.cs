@@ -9,59 +9,110 @@ namespace Ramadhan_Digital.Controllers
     {
         public static void MapIbadahHarian(this WebApplication app)
         {
-            var publicGroup = app.MapGroup("/api/v1/ibadah-harian").RequireAuthorization();
+            var group = app.MapGroup("/api/v1/ibadah-harian").RequireAuthorization();
+            // Endpoint Siswa: Simpan / Update data ibadah harian
+            group.MapPost("/", SaveIbadahHarian).WithName("SaveIbadahHarian");
 
-            //----GURU/SISWA----
-            publicGroup.MapGet("/", GetIbadahByUserAndDate).WithName("GetIbadahByUserAndDate");
-            //----GURU/SISWA----
-            publicGroup.MapPost("/", SaveIbadah).WithName("SaveIbadah");
+            // Endpoint Siswa: Ambil data ibadah hari tertentu
+            group.MapGet("/", GetByUserAndDate).WithName("GetIbadahHarianByUserAndDate");
+
+            // Endpoint Siswa: Riwayat ibadah siswa (rentang tanggal)
+            group.MapGet("/riwayat", GetRiwayatSiswa).WithName("GetRiwayatSiswaIbadah");
+
+            // Endpoint Guru / Admin: Monitoring ibadah siswa 1 kelas pada tanggal tertentu
+            group.MapGet("/monitoring/kelas/{idKelas:int}", GetMonitoringKelas).WithName("GetMonitoringKelasIbadah");
+
         }
 
-        // GET /api/v1/ibadah-harian?tanggal=2026-03-20
-        private static async Task<IResult> GetIbadahByUserAndDate(
+        private static async Task<IResult> GetByUserAndDate(
+            [FromQuery] DateTime? tanggal,
             ClaimsPrincipal user,
-            [FromQuery] DateTime tanggal,
             IbadahHarianServices service)
         {
-            // Ambil idUser otomatis dari Claim JWT Token 
-            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value;
-            if (!int.TryParse(userIdClaim, out int idUser))
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                              ?? user.FindFirst("id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int idUser))
             {
                 return Results.Unauthorized();
             }
 
-            var data = await service.GetByUserAndDateAsync(idUser, tanggal);
+            DateTime targetDate = tanggal?.Date ?? DateTime.Today;
+            var data = await service.GetByUserAndDateAsync(idUser, targetDate);
+
             if (data == null)
             {
-                return Results.NotFound(new { status = "error", message = "Data ibadah harian tidak ditemukan" });
+                return Results.NotFound(new { 
+                    status = "error", 
+                    message = "Data ibadah harian tidak ditemukan" 
+                });
             }
 
             return Results.Ok(new { status = "success", data });
         }
 
-        // POST /api/v1/ibadah-harian
-        private static async Task<IResult> SaveIbadah(
+        private static async Task<IResult> SaveIbadahHarian(
+            [FromBody] IbadahHarian model,
             ClaimsPrincipal user,
-            [FromBody] IbadahHarian ibadah,
             IbadahHarianServices service)
         {
-            // Ambil idUser otomatis dari Claim JWT Token
-            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value;
-            if (!int.TryParse(userIdClaim, out int idUser))
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                              ?? user.FindFirst("id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int idUser))
             {
                 return Results.Unauthorized();
             }
 
-            // Assign idUser ke model IbadahHarian
-            ibadah.IdUser = idUser;
+            // Bind id_user dari token JWT demi keamanan data
+            model.IdUser = idUser;
 
-            var isSaved = await service.SaveIbadahHarianAsync(ibadah);
-            if (!isSaved)
+            var result = await service.SaveIbadahHarianAsync(model);
+            if (!result.Success)
             {
-                return Results.BadRequest(new { status = "error", message = "Gagal menyimpan data ibadah harian" });
+                return Results.BadRequest(new { 
+                    status = "error", 
+                    message = result.Message 
+                });
             }
 
-            return Results.Ok(new { status = "success", message = "Data ibadah harian berhasil disimpan" });
+            return Results.Ok(new { 
+                status = "success", 
+                message = result.Message 
+            });
+        }
+
+        private static async Task<IResult> GetRiwayatSiswa(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            ClaimsPrincipal user,
+            IbadahHarianServices service)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                              ?? user.FindFirst("id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int idUser))
+            {
+                return Results.Unauthorized();
+            }
+
+            // Default rentang: 30 hari ke belakang dari hari ini jika parameter tidak diisi
+            DateTime end = endDate?.Date ?? DateTime.Today;
+            DateTime start = startDate?.Date ?? end.AddDays(-30);
+
+            var data = await service.GetRiwayatSiswaAsync(idUser, start, end);
+            return Results.Ok(new { status = "success", data });
+        }
+
+        private static async Task<IResult> GetMonitoringKelas(
+            int idKelas,
+            [FromQuery] DateTime? tanggal,
+            IbadahHarianServices service)
+        {
+            DateTime targetDate = tanggal?.Date ?? DateTime.Today;
+            var data = await service.GetMonitoringKelasAsync(idKelas, targetDate);
+
+            return Results.Ok(new { status = "success", data });
         }
     }
 }

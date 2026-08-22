@@ -4,7 +4,7 @@ using Ramadhan_Digital.Services;
 using ModelRegisterRequest = Ramadhan_Digital.Models.RegisterRequest;
 using System.Security.Claims;
 using System.Linq;
-
+    
 namespace Ramadhan_Digital.Controllers
 {
     public static class AuthController
@@ -81,7 +81,7 @@ namespace Ramadhan_Digital.Controllers
                 IPasswordService passwordService,
                 IJWTService jwtService) =>
             {
-                
+
 
                 try
                 {
@@ -106,6 +106,7 @@ namespace Ramadhan_Digital.Controllers
                     {
                         Token = token,
                         Username = user.Username,
+                        IdKelas = user.IdKelas,
                         Nama = user.Nama,
                         Role = user.Role,
                         Kelas = user.Kelas,
@@ -187,7 +188,6 @@ namespace Ramadhan_Digital.Controllers
                             Message = "File tidak ditemukan atau kosong"
                         });
                     }
-
                     var allowedExtensions = new[] { ".xlsx", ".xls" };
                     var fileExtension = Path.GetExtension(file.FileName).ToLower();
 
@@ -383,3 +383,4 @@ namespace Ramadhan_Digital.Controllers
         }
     }
 }
+

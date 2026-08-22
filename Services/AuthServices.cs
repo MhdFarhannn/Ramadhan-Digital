@@ -53,7 +53,7 @@ namespace Ramadhan_Digital.Services
 
             string sql = @"
          SELECT u.id, u.nama AS Nama, u.username AS Username, u.password AS Password,
-        r.Name as Role,k.Nama as Kelas
+        r.Name as Role,k.Nama as Kelas, k.id as idKelas
  FROM users u
  JOIN role r ON u.id_role = r.id
  JOIN kelas k ON u.id_kelas = k.id

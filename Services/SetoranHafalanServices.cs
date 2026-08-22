@@ -199,5 +199,13 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, new { Id = id });
             return result > 0;
         }
+
+        // SETORAN HAFALAN BY ID KELAS
+        public async Task<IEnumerable<SetoranHafalan>> GetByKelasIdAsync(int idKelas)
+        {
+            using var conn = db.Connect();
+            string sql = @"SELECT * FROM setoran_hafalan WHERE id_kelas = @IdKelas;";
+            return await conn.QueryAsync<SetoranHafalan>(sql, new { IdKelas = idKelas });
+        }
     }
 }
