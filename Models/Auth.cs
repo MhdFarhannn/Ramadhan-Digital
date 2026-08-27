@@ -16,7 +16,7 @@ namespace Ramadhan_Digital.Models
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
-
+           
     public class LoginResponse
     {
         public string Token { get; set; } = string.Empty;
@@ -39,6 +39,11 @@ namespace Ramadhan_Digital.Models
         public int ImportedCount { get; set; }
         public List<string> Errors { get; set; } = new List<string>();
         public string Message { get; set; } = string.Empty;
+    }
+
+    public class UpdateKelasGuruRequest
+    {
+        public int IdKelas { get; set; }
     }
 
 

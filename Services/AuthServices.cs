@@ -89,14 +89,13 @@ namespace Ramadhan_Digital.Services
             using var conn = db.Connect();
             string sql = @"
                 INSERT INTO users
-                (id_role, id_kelas, nama, username, password)
+                (id_role, nama, username, password)
                 VALUES
-                (@IdRole, @IdKelas, @Nama, @Username, @Password);
+                (@IdRole, @Nama, @Username, @Password);
             ";
             var result = await conn.ExecuteAsync(sql, new
             {
                 IdRole = 2,
-                IdKelas = user.IdKelas,
                 Nama = user.Nama,
                 Username = user.Username,
                 Password = user.Password
@@ -139,7 +138,7 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, new
             {
                 IdRole = 2, // Role ID untuk Guru
-                IdKelas = user.IdKelas,
+                IdKelas = 5, // ID Kelas default
                 Nama = user.Nama,
                 Username = user.Username,
                 Password = user.Password
@@ -167,5 +166,44 @@ namespace Ramadhan_Digital.Services
             int result = await conn.ExecuteAsync(sql, new { id });
             return result > 0;
         }
+
+        //PUT KELAS GURU
+        public async Task<bool> UpdateKelasGuru(int id, int idKelas)
+        {
+            using var conn = db.Connect();
+            string sql = "UPDATE users SET id_kelas = @idKelas WHERE id = @id";
+            int result = await conn.ExecuteAsync(sql, new { idKelas, id });
+            return result > 0;
+        }
+
+        // GET ALL SISWA
+        public async Task<IEnumerable<UserDTO>> GetAllSiswa()
+        {
+            using var conn = db.Connect();
+            string sql = @"
+        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas
+        FROM users u
+        LEFT JOIN role r ON u.id_role = r.id
+        LEFT JOIN kelas k ON u.id_kelas = k.id
+        WHERE u.id_role = 3;
+    ";
+            return await conn.QueryAsync<UserDTO>(sql);
+        }
+
+        //GET ALL GURU
+        public async Task<IEnumerable<UserDTO>> GetAllGuru()
+        {
+            using var conn = db.Connect();
+            string sql = @"
+        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas
+        FROM users u
+        LEFT JOIN role r ON u.id_role = r.id
+        LEFT JOIN kelas k ON u.id_kelas = k.id
+        WHERE u.id_role = 2;
+    ";
+            return await conn.QueryAsync<UserDTO>(sql);
+        }
+
+        
     }
 }

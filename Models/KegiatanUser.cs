@@ -10,7 +10,6 @@
 
         public string Note { get; set; }
 
-
         public User User { get; set; }
 
         public Kegiatan Kegiatan { get; set; }

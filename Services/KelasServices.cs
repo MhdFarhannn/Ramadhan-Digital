@@ -53,6 +53,30 @@ namespace Ramadhan_Digital.Services
             return result > 0;
         }
 
+        //PATCH
+        public async Task<bool> UpdateAsync(int id, Kelas kelas)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                UPDATE kelas
+                SET nama = @Nama, angkatan = @Angkatan
+                WHERE id = @Id
+            ";
+            var result = await conn.ExecuteAsync(sql, new { Id = id, Nama = kelas.Nama, Angkatan = kelas.Angkatan });
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                DELETE FROM kelas
+                WHERE id = @Id
+            ";
+            var result = await conn.ExecuteAsync(sql, new { Id = id });
+            return result > 0;
+        }
+
 
     }
 }

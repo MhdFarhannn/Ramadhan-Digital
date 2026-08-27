@@ -13,8 +13,7 @@ namespace Ramadhan_Digital.Controllers
         {
             var publicGroup = app.MapGroup("/api/v1/auth");
             var adminGroup = app.MapGroup("/api/v1/auth").RequireAuthorization(Policies.Admin);
-
-
+             
 
             publicGroup.MapPost("/register-admin", async (
                 ModelRegisterRequest request,
@@ -122,6 +121,10 @@ namespace Ramadhan_Digital.Controllers
 
             }).DisableAntiforgery();
 
+            // =========
+            // Register bulk siswa dari file Excel
+            // ================
+
             adminGroup.MapPost("/register-bulk-excel-siswa", async (
                 IFormFile file,
                 int idKelas,
@@ -174,6 +177,9 @@ namespace Ramadhan_Digital.Controllers
                 }
             }).DisableAntiforgery().WithName("ImportSiswaFromExcel");
 
+            // ================
+            // Register bulk guru dari file Excel
+            // ================
             adminGroup.MapPost("/register-bulk-excel-guru", async (
                 IFormFile file,
                 ExcelImportService excelService) =>
@@ -188,21 +194,27 @@ namespace Ramadhan_Digital.Controllers
                             Message = "File tidak ditemukan atau kosong"
                         });
                     }
-                    var allowedExtensions = new[] { ".xlsx", ".xls" };
-                    var fileExtension = Path.GetExtension(file.FileName).ToLower();
-
+            
+                    var allowedExtensions = new[] { ".xlsx" };
+            
+                    var fileExtension =
+                        Path.GetExtension(file.FileName)
+                            .ToLowerInvariant();
+            
                     if (!allowedExtensions.Contains(fileExtension))
                     {
                         return Results.BadRequest(new ExcelImportResponse
                         {
                             Success = false,
-                            Message = "Format file harus .xlsx atau .xls"
+                            Message = "Format file harus .xlsx"
                         });
                     }
-
+            
                     using var stream = file.OpenReadStream();
-                    var (success, importedCount, errors) = await excelService.ImportGuruFromExcel(stream);
-
+            
+                    var (success, importedCount, errors) =
+                        await excelService.ImportGuruFromExcel(stream);
+            
                     var response = new ExcelImportResponse
                     {
                         Success = success,
@@ -212,8 +224,10 @@ namespace Ramadhan_Digital.Controllers
                             ? $"Berhasil mengimpor {importedCount} guru"
                             : "Gagal mengimpor data guru dari Excel"
                     };
-
-                    return success ? Results.Ok(response) : Results.BadRequest(response);
+            
+                    return success
+                        ? Results.Ok(response)
+                        : Results.BadRequest(response);
                 }
                 catch (Exception ex)
                 {
@@ -222,32 +236,9 @@ namespace Ramadhan_Digital.Controllers
                         detail: ex.Message,
                         statusCode: StatusCodes.Status500InternalServerError);
                 }
-            }).DisableAntiforgery().WithName("ImportGuruFromExcel");
-
-            adminGroup.MapGet("/me", (ClaimsPrincipal user) =>
-            {
-                try
-                {
-                    var username = user.Identity?.Name ?? string.Empty;
-                    var roles = user.Claims
-                        .Where(c => c.Type == ClaimTypes.Role)
-                        .Select(c => c.Value)
-                        .ToArray();
-
-                    return Results.Ok(new
-                    {
-                        username,
-                        roles
-                    });
-                }
-                catch (Exception ex)
-                {
-                    return Results.Problem(
-                        title: "Internal Server Error",
-                        detail: ex.Message,
-                        statusCode: StatusCodes.Status500InternalServerError);
-                }
-            });
+            })
+            .DisableAntiforgery()
+            .WithName("ImportGuruFromExcel");
 
             adminGroup.MapPost("register-guru", async (
                 ModelRegisterRequest request,
@@ -380,6 +371,89 @@ namespace Ramadhan_Digital.Controllers
                         statusCode: StatusCodes.Status500InternalServerError);
                 }
             }).WithName("GetUsers");
+
+            //PUT KELAS GURU
+            adminGroup.MapPut("/kelas-guru/{id}", async (
+                int id,
+                UpdateKelasGuruRequest request,
+                AuthServices services) =>
+            {
+                try
+                {
+                    var result = await services.UpdateKelasGuru(id, request.IdKelas);
+            
+                    if (result)
+                    {
+                        return Results.Ok(new
+                        {
+                            message = "Kelas guru updated successfully."
+                        });
+                    }
+            
+                    return Results.NotFound(new
+                    {
+                        message = "User not found."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).WithName("UpdateKelasGuru");
+
+            // GET ALL SISWA
+            adminGroup.MapGet("/siswa", async (
+                AuthServices services) =>
+            {
+                try
+                {
+                    var result = await services.GetAllSiswa();
+                    if (result != null)
+                    {
+                        return Results.Ok(result);
+                    }
+                    return Results.NotFound(new
+                    {
+                        message = "No users found."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).WithName("GetAllSiswa");
+
+            // GET ALL GURU
+            adminGroup.MapGet("/guru",   async (
+                AuthServices services) =>
+            {
+                try
+                {
+                    var result = await services.GetAllGuru();
+                    if (result != null)
+                    {
+                        return Results.Ok(result);
+                    }
+                    return Results.NotFound(new
+                    {
+                        message = "No users found."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }).WithName("GetAllGuru");
+            
         }
     }
 }

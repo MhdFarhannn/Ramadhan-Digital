@@ -21,6 +21,10 @@ namespace Ramadhan_Digital.Controllers
             group.MapPost("/", CreateKegiatan)
                  .WithName("CreateKegiatan");
 
+            //PATCH KEGIATAN
+            group.MapPatch("/{id:int}", UpdateKegiatan)
+                 .WithName("UpdateKegiatan");
+
             //----GURU----
             //GET by User ID
             group.MapGet("/user/{idUser:int}", GetKegiatanByUserId)
@@ -165,6 +169,30 @@ namespace Ramadhan_Digital.Controllers
             {
                 status = "success",
                 message = "Kegiatan berhasil dihapus"
+            });
+            
+        }
+
+        private static async Task<IResult> UpdateKegiatan(
+            int id,
+            KegiatanServices service,
+            Kegiatan kegiatan)
+        {
+            var isUpdated = await service.UpdateAsync(id, kegiatan);
+
+            if (!isUpdated)
+            {
+                return Results.NotFound(new
+                {
+                    status = "error",
+                    message = "Kegiatan tidak ditemukan atau gagal diupdate"
+                });
+            }
+
+            return Results.Ok(new
+            {
+                status = "success",
+                message = "Kegiatan berhasil diupdate"
             });
         }
     }

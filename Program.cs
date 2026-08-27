@@ -13,6 +13,33 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAndroid", policy =>
     {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+
+    options.AddPolicy("AllowWebFrontend", policy =>
+    {
+        policy.WithOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:5174",
+                    "http://localhost:5173",   
+                    "http://localhost:4200",
+                    "http://192.168.69.50:5173",
+                    "https://yourdomain.com"   
+              )
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); 
+    });
+
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAndroid", policy =>
+    {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
@@ -36,6 +63,7 @@ builder.Services.AddScoped<IbadahHarianServices>();
 builder.Services.AddScoped<IbadahSunnahServices>();
 builder.Services.AddScoped<AbsensiServices>();
 builder.Services.AddScoped<StatusServices>();
+
 
 
 
@@ -71,7 +99,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options => Policies.Register(options));
 
 var app = builder.Build();
-
+app.UseCors("AllowWebFrontend");
 // In development skip automatic HTTPS redirection to avoid "Failed to determine the https port" when
 // no HTTPS endpoint is configured. This makes testing with Postman easier on the HTTP URL.
 if (!app.Environment.IsDevelopment())

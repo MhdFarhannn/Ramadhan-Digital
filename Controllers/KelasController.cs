@@ -11,6 +11,8 @@ namespace Ramadhan_Digital.Controllers
             publicGroup.MapGet("/", GetAllKelas).WithName("GetAllKelas");
             publicGroup.MapGet("/{id:int}", GetKelasById).WithName("GetKelasById");
             publicGroup.MapPost("/", CreateKelas).WithName("CreateKelas");
+            publicGroup.MapPatch("/{id:int}", UpdateKelas).WithName("UpdateKelas");
+            publicGroup.MapDelete("/{id:int}", DeleteKelas).WithName("DeleteKelas");
         }
 
         private static async Task<IResult> GetAllKelas(KelasServices kelasServices)
@@ -33,6 +35,22 @@ namespace Ramadhan_Digital.Controllers
             if (!result)
                 return Results.BadRequest(new { message = "Failed to create kelas" });
             return Results.Ok(new { message = "Kelas created successfully" });
+        }
+
+        private async static Task<IResult> UpdateKelas(int id, Kelas kelas, KelasServices kelasServices)
+        {
+            var result = await kelasServices.UpdateAsync(id, kelas);
+            if (!result)
+                return Results.BadRequest(new { message = "Failed to update kelas" });
+            return Results.Ok(new { message = "Kelas updated successfully" });
+        }
+
+        private async static Task<IResult> DeleteKelas(int id, KelasServices kelasServices)
+        {
+            var result = await kelasServices.DeleteAsync(id);
+            if (!result)
+                return Results.BadRequest(new { message = "Failed to delete kelas" });
+            return Results.Ok(new { message = "Kelas deleted successfully" });
         }
     }
 }

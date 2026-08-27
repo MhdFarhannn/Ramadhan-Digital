@@ -115,5 +115,19 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, new { Id = id });
             return result > 0;
         }
+
+        //PATCH KEGIATAN BY ID
+        public async Task<bool> UpdateAsync(int id, Kegiatan kegiatan)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                UPDATE kegiatan
+                SET judul = @Judul, pemateri = @Pemateri, tanggal = @Tanggal
+                WHERE id = @Id
+            ";
+            var result = await conn.ExecuteAsync(sql, new { Id = id, Judul = kegiatan.Judul, Pemateri = kegiatan.Pemateri, Tanggal = kegiatan.Tanggal });
+            return result > 0;
+        }
+        
     }
 }
