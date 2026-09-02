@@ -71,6 +71,7 @@ namespace Ramadhan_Digital.Controllers
                 });
             }
 
+
             return Results.Ok(new
             {
                 status = "success",
@@ -195,5 +196,8 @@ namespace Ramadhan_Digital.Controllers
                 message = "Kegiatan berhasil diupdate"
             });
         }
+
+
+        
     }
 }

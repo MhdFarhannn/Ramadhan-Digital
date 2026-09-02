@@ -249,5 +249,37 @@ namespace Ramadhan_Digital.Services
 
             return ibadahList;
         }
+
+        public async Task<IEnumerable<IbadahHarianDto>> GetRiwayatPerSiswaAsync(
+            int idSiswa,
+            DateTime? startDate,
+            DateTime? endDate)
+        {
+            using var conn = db.Connect();
+        
+            string sql = @"
+                SELECT 
+                    ih.*,
+                    u.nama AS NamaUser
+                FROM ibadah_harian ih
+                LEFT JOIN users u ON ih.id_user = u.id
+                WHERE ih.id_user = @IdSiswa
+                  AND (@StartDate IS NULL OR ih.tanggal >= @StartDate)
+                  AND (@EndDate IS NULL OR ih.tanggal <= @EndDate)
+                ORDER BY ih.tanggal DESC;";
+        
+            var result = await conn.QueryAsync<IbadahHarianDto>(
+                sql,
+                new
+                {
+                    IdSiswa = idSiswa,
+                    StartDate = startDate,
+                    EndDate = endDate
+                });
+        
+            return result;
+        }
+
+        
     }
 }

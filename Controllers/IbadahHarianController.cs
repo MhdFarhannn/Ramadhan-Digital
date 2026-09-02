@@ -22,6 +22,8 @@ namespace Ramadhan_Digital.Controllers
             // Endpoint Guru / Admin: Monitoring ibadah siswa 1 kelas pada tanggal tertentu
             group.MapGet("/monitoring/kelas/{idKelas:int}", GetMonitoringKelas).WithName("GetMonitoringKelasIbadah");
 
+            // Endpoint Guru / Admin: Monitoring ibadah siswa 1 siswa pada rentang tanggal tertentu
+            group.MapGet("/monitoring/siswa/{idSiswa:int}", GetMonitoringSiswa).WithName("GetMonitoringSiswaIbadah");
         }
 
         private static async Task<IResult> GetByUserAndDate(
@@ -114,5 +116,26 @@ namespace Ramadhan_Digital.Controllers
 
             return Results.Ok(new { status = "success", data });
         }
+
+        private static async Task<IResult> GetMonitoringSiswa(
+            int idSiswa,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            IbadahHarianServices service)
+        {
+            var data = await service.GetRiwayatSiswaAsync(idSiswa, startDate, endDate);
+            return Results.Ok(new { status = "success", data });
+        }
+
+        private static async Task<IResult> GetRiwayatPerSiswa(
+            int idSiswa,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            IbadahHarianServices service)
+        {
+            var data = await service.GetRiwayatPerSiswaAsync(idSiswa, startDate, endDate);
+            return Results.Ok(new { status = "success", data });
+        }
+
     }
 }
