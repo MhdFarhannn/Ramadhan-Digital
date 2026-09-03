@@ -24,4 +24,29 @@
         public DateTime Tanggal { get; set; }
        
     }
+
+    
+    
+    public class IbadahSunnahMonitoringDto
+    {
+        public int IdKategoriSunnah { get; set; }
+    
+        public string Nama { get; set; } = string.Empty;
+    
+        public bool SudahDilakukan { get; set; }
+    
+        public int? IdIbadahSunnah { get; set; }
+    
+        public int? IdUser { get; set; }
+    
+        public DateTime? Tanggal { get; set; }
+    }
+
+    
+    public class SaveIbadahSunnahRequest
+    {
+        public DateTime Tanggal { get; set; }
+    
+        public List<int> IdKategoriSunnahList { get; set; } = new();
+    }
 }

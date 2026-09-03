@@ -4,15 +4,15 @@
     {
         public int Id { get; set; }
 
-        public int IdUser { get; set; }
+        public int? IdUser { get; set; }
 
-        public int IdSurah { get; set; }
+        public int? IdSurah { get; set; }
 
         public int? IdBacaanSholat { get; set; }
 
-        public int IdStatusSetoranHafalan { get; set; }
+        public int? IdStatusSetoranHafalan { get; set; }
 
-        public string Note { get; set; }
+        public string? Note { get; set; }
 
         public DateTime TanggalSetoran { get; set; }
 

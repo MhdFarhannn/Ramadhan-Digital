@@ -13,7 +13,7 @@ public class IbadahSunnahServices
     }
 
     // ============================================================
-    // GET ALL IBADAH SUNNAH BY USER & TANGGAL
+    // GET SEMUA IBADAH SUNNAH BERDASARKAN USER & TANGGAL
     // ============================================================
     public async Task<IEnumerable<IbadahSunnah>> GetByUserAndDateAsync(
         int idUser,
@@ -105,7 +105,9 @@ public class IbadahSunnahServices
         {
             var tanggalOnly = tanggal.Date;
 
-            
+            // ====================================================
+            // LOCK BERDASARKAN USER + TANGGAL
+            // ====================================================
             const string lockSql = @"
                 SELECT pg_advisory_xact_lock(
                     hashtext(@LockKey)
@@ -116,20 +118,23 @@ public class IbadahSunnahServices
                 lockSql,
                 new
                 {
-                    LockKey = $"ibadah-sunnah:{idUser}:{tanggalOnly:yyyy-MM-dd}"
+                    LockKey =
+                        $"ibadah-sunnah:{idUser}:{tanggalOnly:yyyy-MM-dd}"
                 },
                 transaction
             );
 
 
+            // ====================================================
+            // CEK SUDAH PERNAH DISIMPAN
+            // ====================================================
             const string checkSql = @"
                 SELECT EXISTS (
                     SELECT 1
                     FROM ibadah_sunnah
                     WHERE id_user = @IdUser
                       AND tanggal = @Tanggal
-            );
-
+                );
             ";
 
             var alreadySaved = await conn.ExecuteScalarAsync<bool>(
@@ -171,7 +176,8 @@ public class IbadahSunnahServices
                     );
                 ";
 
-                foreach (var idKategori in idKategoriSunnahList.Distinct())
+                foreach (var idKategori in
+                    idKategoriSunnahList.Distinct())
                 {
                     await conn.ExecuteAsync(
                         insertSql,
@@ -204,9 +210,17 @@ public class IbadahSunnahServices
 
 
     // ============================================================
-    // GET IBADAH SUNNAH MILIK SISWA TERTENTU
+    // GET MONITORING IBADAH SUNNAH SISWA
+    //
+    // Semua kategori sunnah akan ditampilkan.
+    //
+    // Jika siswa sudah melakukan:
+    //     SudahDilakukan = true
+    //
+    // Jika siswa belum melakukan:
+    //     SudahDilakukan = false
     // ============================================================
-    public async Task<IEnumerable<IbadahSunnahDto>> GetByUser(
+    public async Task<IEnumerable<IbadahSunnahMonitoringDto>> GetByUser(
         int idUser,
         DateTime tanggal)
     {
@@ -214,17 +228,30 @@ public class IbadahSunnahServices
 
         const string sql = @"
             SELECT
-                id,
-                id_kategori_sunnah,
-                id_user,
-                tanggal::timestamp AS tanggal
-            FROM ibadah_sunnah
-            WHERE id_user = @IdUser
-              AND tanggal = @Tanggal
-            ORDER BY id ASC;
+                ks.id AS IdKategoriSunnah,
+                ks.nama AS Nama,
+
+                CASE
+                    WHEN is_s.id IS NOT NULL
+                    THEN TRUE
+                    ELSE FALSE
+                END AS SudahDilakukan,
+
+                is_s.id AS IdIbadahSunnah,
+                is_s.id_user AS IdUser,
+                is_s.tanggal::timestamp AS Tanggal
+
+            FROM kategori_sunnah ks
+
+            LEFT JOIN ibadah_sunnah is_s
+                ON is_s.id_kategori_sunnah = ks.id
+                AND is_s.id_user = @IdUser
+                AND is_s.tanggal = @Tanggal
+
+            ORDER BY ks.id ASC;
         ";
 
-        var result = await conn.QueryAsync<IbadahSunnahDto>(
+        return await conn.QueryAsync<IbadahSunnahMonitoringDto>(
             sql,
             new
             {
@@ -232,8 +259,6 @@ public class IbadahSunnahServices
                 Tanggal = tanggal.Date
             }
         );
-
-        return result;
     }
 }
 

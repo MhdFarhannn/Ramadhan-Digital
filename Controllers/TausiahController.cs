@@ -15,6 +15,7 @@ namespace Ramadhan_Digital.Controllers
             publicGroup.MapGet("/", GetAllTausiah).WithName("GetAllTausiah");
             publicGroup.MapGet("/{id:int}", GetTausiahById).WithName("GetTausiahById");
             publicGroup.MapPost("/", CreateTausiah).WithName("CreateTausiah");
+            publicGroup.MapGet("/user/{userId:int}", GetTausiahByUserId).WithName("GetTausiahByUserId");
         }
 
         private static async Task<IResult> GetAllTausiah(TausiahServices service)
@@ -54,6 +55,12 @@ namespace Ramadhan_Digital.Controllers
                 return Results.BadRequest(new { status = "error", message = "Gagal menambahkan tausiah" });
 
             return Results.Ok(new { status = "success", message = "Tausiah berhasil ditambahkan" });
+        }
+
+        private static async Task<IResult> GetTausiahByUserId(int userId, TausiahServices service)
+        {
+            var data = await service.GetByUserIdAsync(userId);
+            return Results.Ok(new { status = "success", data });
         }
     }
 }

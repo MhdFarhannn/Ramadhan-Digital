@@ -62,5 +62,26 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, tausiah);
             return result > 0;
         }
+
+        //GET TAUSIAH BY ID USER
+        public async Task<IEnumerable<Tausiah>> GetByUserIdAsync(int userId)
+        {
+            using var conn = db.Connect();
+            string sql = @"
+                SELECT  
+                    id AS Id,
+                    id_user AS IdUser,
+                    judul_tausiah AS JudulTausiah,
+                    ringkasan AS Ringkasan,
+                    tanggal::timestamp AS Tanggal,
+                    nama_penceramah AS NamaPenceramah   
+                FROM tausiah
+                WHERE id_user = @UserId
+            ";
+            return await conn.QueryAsync<Tausiah>(
+                sql,
+                new { UserId = userId }
+            );
+        }
     }
 }
