@@ -10,10 +10,8 @@
 
         public int IdStatusAbsensi { get; set; }
 
-
         public User User { get; set; }
 
         public StatusAbsensi StatusAbsensi { get; set; }
     }
-
 }

@@ -610,5 +610,9 @@ namespace Ramadhan_Digital.Services
 
             return result > 0;
         }
+
+        // ============================================================
+        // GET SETORAN SURAH BY USER ID
+        // ============================================================
     }
 }
