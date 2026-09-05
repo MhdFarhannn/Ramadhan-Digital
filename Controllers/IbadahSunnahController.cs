@@ -37,6 +37,13 @@ public static class IbadahSunnahController
                 GetGuruIbadahSunnahBySiswa
             )
             .WithName("GetGuruIbadahSunnahBySiswa");
+
+        publicGroup
+            .MapGet(
+                "/monitoring/siswa/{idSiswa:int}/rekap",
+                GetRiwayatIbadahSunnahSiswa
+            )
+            .WithName("GetRiwayatIbadahSunnahSiswa");
     }
 
 
@@ -46,7 +53,7 @@ public static class IbadahSunnahController
     // ============================================================
     private static async Task<IResult> GetMyIbadahSunnah(
         ClaimsPrincipal user,
-        [FromQuery] DateTime? tanggal,
+        [FromQuery] DateOnly? tanggal,
         IbadahSunnahServices service)
     {
         // ========================================================
@@ -65,9 +72,12 @@ public static class IbadahSunnahController
         // ========================================================
         // JIKA TANGGAL TIDAK DIKIRIM
         // GUNAKAN TANGGAL HARI INI
+        //
+        // Kolom ibadah_sunnah.tanggal bertipe date.
+        // Default: tanggal lokal server (tanpa konversi UTC).
         // ========================================================
         var tanggalFilter =
-            tanggal?.Date ?? DateTime.Today;
+            tanggal ?? DateOnly.FromDateTime(DateTime.Today);
 
 
         // ========================================================
@@ -82,13 +92,14 @@ public static class IbadahSunnahController
 
         // ========================================================
         // RESPONSE
+        //
+        // DateOnly diserialisasi otomatis menjadi "yyyy-MM-dd".
         // ========================================================
         return Results.Ok(new
         {
             status = "success",
 
-            tanggal =
-                tanggalFilter.ToString("dd-MM-yyyy"),
+            tanggal = tanggalFilter,
 
             data
         });
@@ -119,9 +130,12 @@ public static class IbadahSunnahController
 
         // ========================================================
         // TANGGAL SELALU HARI INI
+        //
+        // Tanggal lokal server, tanpa konversi UTC,
+        // agar tanggal tidak bergeser.
         // ========================================================
         var tanggalHariIni =
-            DateTime.Today;
+            DateOnly.FromDateTime(DateTime.Today);
 
 
         // ========================================================
@@ -178,8 +192,7 @@ public static class IbadahSunnahController
                     "Anda dapat melakukan input kembali " +
                     "setelah pukul 00:00.",
 
-                tanggal =
-                    tanggalHariIni.ToString("dd-MM-yyyy")
+                tanggal = tanggalHariIni
             });
         }
 
@@ -207,8 +220,7 @@ public static class IbadahSunnahController
                 message =
                     "Ibadah sunnah berhasil disimpan.",
 
-                tanggal =
-                    tanggalHariIni.ToString("dd-MM-yyyy")
+                tanggal = tanggalHariIni
             });
         }
 
@@ -228,8 +240,7 @@ public static class IbadahSunnahController
                     "Anda dapat melakukan input kembali " +
                     "setelah pukul 00:00.",
 
-                tanggal =
-                    tanggalHariIni.ToString("dd-MM-yyyy")
+                tanggal = tanggalHariIni
             });
         }
 
@@ -251,6 +262,8 @@ public static class IbadahSunnahController
     // GET:
     // MONITORING IBADAH SUNNAH SISWA
     //
+    // Kontrak tanggal date-only: yyyy-MM-dd
+    //
     // Contoh:
     //
     // GET
@@ -259,45 +272,21 @@ public static class IbadahSunnahController
     // atau:
     //
     // GET
-    // /api/v1/ibadah-sunnah/monitoring/siswa/13?tanggal=02-09-2026
+    // /api/v1/ibadah-sunnah/monitoring/siswa/13?tanggal=2026-09-02
     // ============================================================
     private static async Task<IResult> GetGuruIbadahSunnahBySiswa(
         int idSiswa,
-        [FromQuery] string? tanggal,
+        [FromQuery] DateOnly? tanggal,
         IbadahSunnahServices service)
     {
-        DateTime tanggalFilter;
-
-
         // ========================================================
         // JIKA TANGGAL KOSONG
         // GUNAKAN HARI INI
+        //
+        // Tanggal lokal server, tanpa konversi UTC.
         // ========================================================
-        if (string.IsNullOrWhiteSpace(tanggal))
-        {
-            tanggalFilter =
-                DateTime.Today;
-        }
-
-        // ========================================================
-        // PARSE TANGGAL dd-MM-yyyy
-        // ========================================================
-        else if (!DateTime.TryParseExact(
-            tanggal,
-            "dd-MM-yyyy",
-            System.Globalization.CultureInfo.InvariantCulture,
-            System.Globalization.DateTimeStyles.None,
-            out tanggalFilter))
-        {
-            return Results.BadRequest(new
-            {
-                status = "error",
-
-                message =
-                    "Format tanggal harus dd-MM-yyyy. " +
-                    "Contoh: 29-08-2026"
-            });
-        }
+        var tanggalFilter =
+            tanggal ?? DateOnly.FromDateTime(DateTime.Today);
 
 
         // ========================================================
@@ -344,6 +333,8 @@ public static class IbadahSunnahController
 
         // ========================================================
         // RESPONSE
+        //
+        // DateOnly diserialisasi otomatis menjadi "yyyy-MM-dd".
         // ========================================================
         return Results.Ok(new
         {
@@ -351,8 +342,7 @@ public static class IbadahSunnahController
 
             idSiswa,
 
-            tanggal =
-                tanggalFilter.ToString("dd-MM-yyyy"),
+            tanggal = tanggalFilter,
 
             ringkasan = new
             {
@@ -368,4 +358,38 @@ public static class IbadahSunnahController
             data = dataList
         });
     }
+    // ============================================================
+    // GET:
+    // SELURUH RIWAYAT IBADAH SUNNAH SISWA
+    //
+    // Contoh:
+    // GET /api/v1/ibadah-sunnah/monitoring/siswa/154/rekap
+    // ============================================================
+    private static async Task<IResult> GetRiwayatIbadahSunnahSiswa(
+            int idSiswa,
+            IbadahSunnahServices service)
+        {
+            // ========================================================
+            // AMBIL SELURUH RIWAYAT IBADAH SUNNAH SISWA
+            // ========================================================
+            var data = await service.GetByUserAsync(idSiswa);
+        
+            var dataList = data.ToList();
+        
+            // ========================================================
+            // RESPONSE
+            // ========================================================
+            return Results.Ok(new
+            {
+                status = "success",
+        
+                idSiswa,
+        
+                total = dataList.Count,
+        
+                data = dataList
+            });
+        }
+
+    
 }

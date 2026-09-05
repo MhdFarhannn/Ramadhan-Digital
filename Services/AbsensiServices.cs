@@ -18,7 +18,7 @@ namespace Ramadhan_Digital.Services
 
         public async Task<IEnumerable<dynamic>> GetAbsensiByKelasAndDateAsync(
             int idKelas,
-            DateTime tanggal)
+            DateOnly tanggal)
         {
             using var conn = db.Connect();
 
@@ -26,7 +26,7 @@ namespace Ramadhan_Digital.Services
                 SELECT
                     u.id AS IdUser,
                     u.nama AS NamaSiswa,
-                    @Tanggal::date AS Tanggal,
+                    @Tanggal AS Tanggal,
 
                     COALESCE(
                         sa.nama,
@@ -42,7 +42,7 @@ namespace Ramadhan_Digital.Services
 
                 LEFT JOIN absensi a
                     ON u.id = a.id_user
-                    AND a.tanggal = @Tanggal::date
+                    AND a.tanggal = @Tanggal
 
                 LEFT JOIN status_absensi sa
                     ON a.id_status_absensi = sa.id
@@ -59,7 +59,7 @@ namespace Ramadhan_Digital.Services
                 new
                 {
                     IdKelas = idKelas,
-                    Tanggal = tanggal.Date
+                    Tanggal = tanggal
                 }
             );
         }
@@ -81,7 +81,7 @@ namespace Ramadhan_Digital.Services
 
         public async Task<bool> IsAbsensiKelasSudahAdaAsync(
             int idKelas,
-            DateTime tanggal)
+            DateOnly tanggal)
         {
             using var conn = db.Connect();
 
@@ -95,7 +95,7 @@ namespace Ramadhan_Digital.Services
 
                     WHERE
                         u.id_kelas = @IdKelas
-                        AND a.tanggal = @Tanggal::date
+                        AND a.tanggal = @Tanggal
                 );
             ";
 
@@ -104,7 +104,7 @@ namespace Ramadhan_Digital.Services
                 new
                 {
                     IdKelas = idKelas,
-                    Tanggal = tanggal.Date
+                    Tanggal = tanggal
                 }
             );
         }
@@ -118,7 +118,7 @@ namespace Ramadhan_Digital.Services
 
         public async Task<bool> SaveAbsensiKelasAsync(
             int idKelas,
-            DateTime tanggal,
+            DateOnly tanggal,
             List<DetailAbsensiSiswa> listAbsensi)
         {
             using var conn = db.Connect();
@@ -127,8 +127,6 @@ namespace Ramadhan_Digital.Services
 
             try
             {
-                var tanggalAbsensi = tanggal.Date;
-
                 // ====================================================
                 // CEK ULANG DI DALAM TRANSACTION
                 // ====================================================
@@ -143,7 +141,7 @@ namespace Ramadhan_Digital.Services
 
                         WHERE
                             u.id_kelas = @IdKelas
-                            AND a.tanggal = @Tanggal::date
+                            AND a.tanggal = @Tanggal
                     );
                 ";
 
@@ -153,7 +151,7 @@ namespace Ramadhan_Digital.Services
                         new
                         {
                             IdKelas = idKelas,
-                            Tanggal = tanggalAbsensi
+                            Tanggal = tanggal
                         },
                         transaction
                     );
@@ -218,7 +216,7 @@ namespace Ramadhan_Digital.Services
                     VALUES
                     (
                         @IdUser,
-                        @Tanggal::date,
+                        @Tanggal,
                         @IdStatusAbsensi
                     );
                 ";
@@ -230,7 +228,7 @@ namespace Ramadhan_Digital.Services
                         new
                         {
                             IdUser = item.IdUser,
-                            Tanggal = tanggalAbsensi,
+                            Tanggal = tanggal,
                             IdStatusAbsensi = item.IdStatusAbsensi
                         },
                         transaction
@@ -266,7 +264,7 @@ namespace Ramadhan_Digital.Services
                 SELECT
                     a.id AS Id,
                     a.id_user AS IdUser,
-                    a.tanggal::timestamp AS Tanggal,
+                    a.tanggal AS Tanggal,
                     a.id_status_absensi AS IdStatusAbsensi
 
                 FROM absensi a

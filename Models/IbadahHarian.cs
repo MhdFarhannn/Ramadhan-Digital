@@ -6,7 +6,8 @@
 
         public int IdUser { get; set; }
 
-        public DateTime Tanggal { get; set; }
+        // ibadah_harian.tanggal -> PostgreSQL date
+        public DateOnly Tanggal { get; set; }
 
         public bool MembacaAlquran { get; set; }
 

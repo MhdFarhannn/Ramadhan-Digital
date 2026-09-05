@@ -6,7 +6,8 @@
 
         public int IdUser { get; set; }
 
-        public DateTime Tanggal { get; set; }
+        // absensi.tanggal -> PostgreSQL date
+        public DateOnly Tanggal { get; set; }
 
         public int IdStatusAbsensi { get; set; }
 

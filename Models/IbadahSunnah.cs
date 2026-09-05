@@ -8,7 +8,8 @@
 
         public int IdUser { get; set; }
 
-        public DateTime Tanggal { get; set; }
+        // ibadah_sunnah.tanggal -> PostgreSQL date
+        public DateOnly Tanggal { get; set; }
 
 
         public User User { get; set; }
@@ -21,7 +22,7 @@
         public int Id { get; set; }
         public int IdKategoriSunnah { get; set; }
         public int IdUser { get; set; }
-        public DateTime Tanggal { get; set; }
+        public DateOnly Tanggal { get; set; }
        
     }
 
@@ -39,13 +40,13 @@
     
         public int? IdUser { get; set; }
     
-        public DateTime? Tanggal { get; set; }
+        public DateOnly? Tanggal { get; set; }
     }
 
     
     public class SaveIbadahSunnahRequest
     {
-        public DateTime Tanggal { get; set; }
+        public DateOnly Tanggal { get; set; }
     
         public List<int> IdKategoriSunnahList { get; set; } = new();
     }

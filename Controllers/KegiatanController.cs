@@ -115,41 +115,46 @@ namespace Ramadhan_Digital.Controllers
         }
 
         private static async Task<IResult> RegisterUserKegiatan(
-         [FromBody] KegiatanUser kegiatanUser,
-         KegiatanServices service,
-         HttpContext httpContext)
+            [FromBody] KegiatanUser kegiatanUser,
+            KegiatanServices service,
+            HttpContext httpContext)
         {
-            var userIdClaim = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userIdClaim))
+            // Ambil ID user dari JWT
+            var userIdClaim =
+                httpContext.User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+        
+            if (string.IsNullOrEmpty(userIdClaim) ||
+                !int.TryParse(userIdClaim, out var userId))
             {
                 return Results.Unauthorized();
             }
-
-            if (!int.TryParse(userIdClaim, out var userId))
-            {
-                return Results.Unauthorized();
-            }
-
+        
+            // Jangan percaya IdUser dari request body
             kegiatanUser.IdUser = userId;
-
-            var isRegistered = await service.RegisterUserAsync(kegiatanUser);
-
+        
+            // Simpan
+            var isRegistered =
+                await service.RegisterUserAsync(kegiatanUser);
+        
+            // false = sudah pernah terdaftar
             if (!isRegistered)
             {
-                return Results.BadRequest(new
+                return Results.Conflict(new
                 {
                     status = "error",
-                    message = "Gagal Mengisi Kegiatan"
+                    message = "Anda sudah terdaftar pada kegiatan ini."
                 });
             }
-
+        
             return Results.Ok(new
             {
                 status = "success",
-                message = "Berhasil mengisi kegiatan"
+                message = "Berhasil mengisi kegiatan."
             });
         }
+
+        
 
         private static async Task<IResult> DeleteKegiatanById(
             int id,

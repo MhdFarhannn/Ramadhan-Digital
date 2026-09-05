@@ -24,10 +24,13 @@ namespace Ramadhan_Digital.Controllers
 
             // Endpoint Guru / Admin: Monitoring ibadah siswa 1 siswa pada rentang tanggal tertentu
             group.MapGet("/monitoring/siswa/{idSiswa:int}", GetMonitoringSiswa).WithName("GetMonitoringSiswaIbadah");
+
+            // Endpoint Guru / Admin: Monitoring seluruh ibadah 1 siswa  
+            group.MapGet("/monitoring/siswa/{idSiswa:int}/rekap", GetMonitoringSiswaSemua).WithName("GetMonitoringSiswaSemuaIbadah");
         }
 
         private static async Task<IResult> GetByUserAndDate(
-            [FromQuery] DateTime? tanggal,
+            [FromQuery] DateOnly? tanggal,
             ClaimsPrincipal user,
             IbadahHarianServices service)
         {
@@ -39,7 +42,11 @@ namespace Ramadhan_Digital.Controllers
                 return Results.Unauthorized();
             }
 
-            DateTime targetDate = tanggal?.Date ?? DateTime.Today;
+            // Kolom ibadah_harian.tanggal bertipe date.
+            // Default: tanggal lokal server (tanpa konversi UTC).
+            DateOnly targetDate =
+                tanggal ?? DateOnly.FromDateTime(DateTime.Today);
+
             var data = await service.GetByUserAndDateAsync(idUser, targetDate);
 
             if (data == null)
@@ -85,8 +92,8 @@ namespace Ramadhan_Digital.Controllers
         }
 
         private static async Task<IResult> GetRiwayatSiswa(
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             ClaimsPrincipal user,
             IbadahHarianServices service)
         {
@@ -99,8 +106,8 @@ namespace Ramadhan_Digital.Controllers
             }
 
             // Default rentang: 30 hari ke belakang dari hari ini jika parameter tidak diisi
-            DateTime end = endDate?.Date ?? DateTime.Today;
-            DateTime start = startDate?.Date ?? end.AddDays(-30);
+            DateOnly end = endDate ?? DateOnly.FromDateTime(DateTime.Today);
+            DateOnly start = startDate ?? end.AddDays(-30);
 
             var data = await service.GetRiwayatSiswaAsync(idUser, start, end);
             return Results.Ok(new { status = "success", data });
@@ -108,10 +115,12 @@ namespace Ramadhan_Digital.Controllers
 
         private static async Task<IResult> GetMonitoringKelas(
             int idKelas,
-            [FromQuery] DateTime? tanggal,
+            [FromQuery] DateOnly? tanggal,
             IbadahHarianServices service)
         {
-            DateTime targetDate = tanggal?.Date ?? DateTime.Today;
+            DateOnly targetDate =
+                tanggal ?? DateOnly.FromDateTime(DateTime.Today);
+
             var data = await service.GetMonitoringKelasAsync(idKelas, targetDate);
 
             return Results.Ok(new { status = "success", data });
@@ -119,8 +128,8 @@ namespace Ramadhan_Digital.Controllers
 
         private static async Task<IResult> GetMonitoringSiswa(
             int idSiswa,
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             IbadahHarianServices service)
         {
             var data = await service.GetRiwayatSiswaAsync(idSiswa, startDate, endDate);
@@ -129,13 +138,33 @@ namespace Ramadhan_Digital.Controllers
 
         private static async Task<IResult> GetRiwayatPerSiswa(
             int idSiswa,
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             IbadahHarianServices service)
         {
             var data = await service.GetRiwayatPerSiswaAsync(idSiswa, startDate, endDate);
             return Results.Ok(new { status = "success", data });
         }
+
+        private static async Task<IResult> GetMonitoringSiswaSemua(
+            int idSiswa,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
+            IbadahHarianServices service)
+        {
+            var data = await service.GetMonitoringSiswaSemuaAsync(
+                idSiswa,
+                startDate,
+                endDate
+            );
+        
+            return Results.Ok(new
+            {
+                status = "success",
+                data
+            });
+        }
+
 
     }
 }

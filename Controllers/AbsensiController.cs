@@ -44,10 +44,13 @@ namespace Ramadhan_Digital.Controllers
 
         private static async Task<IResult> GetAbsensiKelas(
             int idKelas,
-            [FromQuery] DateTime? tanggal,
+            [FromQuery] DateOnly? tanggal,
             AbsensiServices service)
         {
-            DateTime targetDate = tanggal?.Date ?? DateTime.Today;
+            // Kolom absensi.tanggal bertipe date.
+            // Default: tanggal lokal server (tanpa konversi UTC).
+            DateOnly targetDate =
+                tanggal ?? DateOnly.FromDateTime(DateTime.Today);
 
             var data = await service.GetAbsensiByKelasAndDateAsync(
                 idKelas,
@@ -122,9 +125,9 @@ namespace Ramadhan_Digital.Controllers
             // HANYA BOLEH INPUT UNTUK HARI INI
             // ========================================================
 
-            var today = DateTime.Today;
+            var today = DateOnly.FromDateTime(DateTime.Today);
 
-            if (request.Tanggal.Date != today)
+            if (request.Tanggal != today)
             {
                 return Results.BadRequest(new
                 {
@@ -206,7 +209,11 @@ namespace Ramadhan_Digital.Controllers
     {
         public int IdKelas { get; set; }
 
-        public DateTime Tanggal { get; set; }
+        // absensi.tanggal -> PostgreSQL date
+        //
+        // Kontrak JSON:
+        //     { "tanggal": "2026-09-05" }
+        public DateOnly Tanggal { get; set; }
 
         public List<DetailAbsensiSiswa> SiswaList { get; set; } = new();
     }

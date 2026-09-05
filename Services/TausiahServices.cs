@@ -22,7 +22,7 @@ namespace Ramadhan_Digital.Services
                     id_user AS IdUser,
                     judul_tausiah AS JudulTausiah,
                     ringkasan AS Ringkasan,
-                    tanggal::timestamp AS Tanggal,
+                    tanggal AS Tanggal,
                     nama_penceramah AS NamaPenceramah
                 FROM tausiah
                 ORDER BY tanggal DESC
@@ -40,7 +40,7 @@ namespace Ramadhan_Digital.Services
                     id_user AS IdUser,
                     judul_tausiah AS JudulTausiah,
                     ringkasan AS Ringkasan,
-                    tanggal::timestamp AS Tanggal,
+                    tanggal AS Tanggal,
                     nama_penceramah AS NamaPenceramah   
                 FROM tausiah
                 WHERE id = @Id
@@ -73,7 +73,7 @@ namespace Ramadhan_Digital.Services
                     id_user AS IdUser,
                     judul_tausiah AS JudulTausiah,
                     ringkasan AS Ringkasan,
-                    tanggal::timestamp AS Tanggal,
+                    tanggal AS Tanggal,
                     nama_penceramah AS NamaPenceramah   
                 FROM tausiah
                 WHERE id_user = @UserId

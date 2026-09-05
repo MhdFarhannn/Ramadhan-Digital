@@ -11,7 +11,9 @@ namespace Ramadhan_Digital.Services
         public int Id { get; set; }
         public int IdUser { get; set; }
         public string? NamaUser { get; set; }
-        public DateTime Tanggal { get; set; }
+
+        // ibadah_harian.tanggal -> PostgreSQL date
+        public DateOnly Tanggal { get; set; }
         public bool MembacaAlquran { get; set; }
         public string? TargetBacaan { get; set; }
         public List<DetailSholatDto> DetailSholatWajibs { get; set; } = new();
@@ -20,12 +22,15 @@ namespace Ramadhan_Digital.Services
     public class DetailSholatDto
     {
         public int Id { get; set; }
-        public int IdIbadahHarian { get; set; } // Tambahkan ini untuk mapping internal Dapper
+        public int IdIbadahHarian { get; set; }
         public int IdKategoriSholatWajib { get; set; }
         public string? Kategori { get; set; }
         public int IdStatusSholatWajib { get; set; }
         public string? Status { get; set; }
     }
+
+
+    
 
     public class IbadahHarianServices
     {
@@ -43,7 +48,7 @@ namespace Ramadhan_Digital.Services
         /// <summary>
         /// Mengambil data ibadah harian milik user tertentu pada tanggal tertentu
         /// </summary>
-        public async Task<IbadahHarianDto?> GetByUserAndDateAsync(int idUser, DateTime tanggal)
+        public async Task<IbadahHarianDto?> GetByUserAndDateAsync(int idUser, DateOnly tanggal)
         {
             using var conn = db.Connect();
 
@@ -52,7 +57,7 @@ namespace Ramadhan_Digital.Services
                     i.id AS Id,
                     i.id_user AS IdUser,
                     u.nama AS NamaUser,
-                    i.tanggal::timestamp AS Tanggal,
+                    i.tanggal AS Tanggal,
                     i.membaca_alquran AS MembacaAlquran,
                     i.target_bacaan AS TargetBacaan
                 FROM ibadah_harian i
@@ -61,7 +66,7 @@ namespace Ramadhan_Digital.Services
 
             var ibadah = await conn.QueryFirstOrDefaultAsync<IbadahHarianDto>(
                 sqlIbadah,
-                new { IdUser = idUser, Tanggal = tanggal.Date }
+                new { IdUser = idUser, Tanggal = tanggal }
             );
 
             if (ibadah == null) return null;
@@ -102,13 +107,11 @@ namespace Ramadhan_Digital.Services
 
             try
             {
-                var targetDate = ibadah.Tanggal.Date;
-
                 // 1. Cek apakah data di tanggal tersebut sudah ada
                 string checkSql = "SELECT id FROM ibadah_harian WHERE id_user = @IdUser AND tanggal = @Tanggal;";
                 var existingId = await conn.QueryFirstOrDefaultAsync<int?>(
                     checkSql,
-                    new { ibadah.IdUser, Tanggal = targetDate },
+                    new { ibadah.IdUser, ibadah.Tanggal },
                     transaction
                 );
 
@@ -126,7 +129,7 @@ namespace Ramadhan_Digital.Services
 
                 int ibadahId = await conn.ExecuteScalarAsync<int>(
                     insertSql,
-                    new { ibadah.IdUser, Tanggal = targetDate, ibadah.MembacaAlquran, ibadah.TargetBacaan },
+                    new { ibadah.IdUser, ibadah.Tanggal, ibadah.MembacaAlquran, ibadah.TargetBacaan },
                     transaction
                 );
 
@@ -164,7 +167,7 @@ namespace Ramadhan_Digital.Services
         /// <summary>
         /// Mengambil daftar seluruh siswa dalam 1 kelas beserta status keterisian ibadahnya
         /// </summary>
-        public async Task<IEnumerable<object>> GetMonitoringKelasAsync(int idKelas, DateTime tanggal)
+        public async Task<IEnumerable<object>> GetMonitoringKelasAsync(int idKelas, DateOnly tanggal)
         {
             using var conn = db.Connect();
         
@@ -182,23 +185,22 @@ namespace Ramadhan_Digital.Services
                 WHERE u.id_kelas = @IdKelas AND LOWER(r.name) = 'siswa'
                 ORDER BY u.nama ASC;";
         
-            return await conn.QueryAsync<object>(sql, new { IdKelas = idKelas, Tanggal = tanggal.Date });
+            return await conn.QueryAsync<object>(sql, new { IdKelas = idKelas, Tanggal = tanggal });
         }
 
-        /// <summary>
-        /// Mengambil riwayat catatan ibadah milik 1 siswa spesifik (Strongly Typed DTO)
-        /// </summary>
-        public async Task<IEnumerable<IbadahHarianDto>> GetRiwayatSiswaAsync(int idSiswa, DateTime? startDate, DateTime? endDate)
+        public async Task<IEnumerable<IbadahHarianDto>> GetRiwayatSiswaAsync(
+            int idSiswa,
+            DateOnly? startDate,
+            DateOnly? endDate)
         {
             using var conn = db.Connect();
-
-            // 1. Query Header Ibadah
+        
             string sqlIbadah = @"
                 SELECT 
                     i.id AS Id,
                     i.id_user AS IdUser,
                     u.nama AS NamaUser,
-                    i.tanggal::timestamp AS Tanggal,
+                    i.tanggal AS Tanggal,
                     i.membaca_alquran AS MembacaAlquran,
                     i.target_bacaan AS TargetBacaan
                 FROM ibadah_harian i
@@ -207,19 +209,26 @@ namespace Ramadhan_Digital.Services
                   AND (@StartDate IS NULL OR i.tanggal >= @StartDate)
                   AND (@EndDate IS NULL OR i.tanggal <= @EndDate)
                 ORDER BY i.tanggal DESC;";
-
-            var ibadahList = (await conn.QueryAsync<IbadahHarianDto>(sqlIbadah, new 
-            { 
-                IdSiswa = idSiswa, 
-                StartDate = startDate?.Date, 
-                EndDate = endDate?.Date 
-            })).ToList();
-
-            if (!ibadahList.Any()) return ibadahList;
-
-            // 2. Query Detail Sholat dengan Strongly Typed DTO
-            var ibadahIds = ibadahList.Select(i => i.Id).ToList();
-
+        
+            var ibadahList = (await conn.QueryAsync<IbadahHarianDto>(
+                sqlIbadah,
+                new
+                {
+                    IdSiswa = idSiswa,
+                    StartDate = startDate,
+                    EndDate = endDate
+                }
+            )).ToList();
+        
+            if (!ibadahList.Any())
+                return ibadahList;
+        
+            // Ambil semua ID ibadah
+            var ibadahIds = ibadahList
+                .Select(i => i.Id)
+                .ToList();
+        
+            // Ambil detail sholat
             string sqlDetail = @"
                 SELECT 
                     ds.id AS Id,
@@ -229,37 +238,57 @@ namespace Ramadhan_Digital.Services
                     ds.id_status_sholat_wajib AS IdStatusSholatWajib,
                     ss.nama AS Status
                 FROM detail_sholat_wajib ds
-                LEFT JOIN kategori_sholat_wajib ks ON ds.id_kategori_sholat_wajib = ks.id
-                LEFT JOIN status_sholat_wajib ss ON ds.id_status_sholat_wajib = ss.id
+                LEFT JOIN kategori_sholat_wajib ks 
+                    ON ds.id_kategori_sholat_wajib = ks.id
+                LEFT JOIN status_sholat_wajib ss 
+                    ON ds.id_status_sholat_wajib = ss.id
                 WHERE ds.id_ibadah_harian = ANY(@IbadahIds)
                 ORDER BY ds.id_kategori_sholat_wajib ASC;";
-
-            var details = await conn.QueryAsync<DetailSholatDto>(sqlDetail, new { IbadahIds = ibadahIds });
-
-            // 3. Grouping aman secara Type-Safe
-            var detailGrouped = details.GroupBy(d => d.IdIbadahHarian).ToDictionary(g => g.Key, g => g.ToList());
-
+        
+            var details = await conn.QueryAsync<DetailSholatDto>(
+                sqlDetail,
+                new
+                {
+                    IbadahIds = ibadahIds
+                }
+            );
+        
+            // Group detail berdasarkan id ibadah
+            var detailGrouped = details
+                .GroupBy(d => d.IdIbadahHarian)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.ToList()
+                );
+        
+            // Masukkan detail ke masing-masing ibadah
             foreach (var ibadah in ibadahList)
             {
-                if (detailGrouped.TryGetValue(ibadah.Id, out var itemDetails))
+                if (detailGrouped.TryGetValue(
+                    ibadah.Id,
+                    out var itemDetails))
                 {
                     ibadah.DetailSholatWajibs = itemDetails;
                 }
             }
-
+        
             return ibadahList;
         }
 
         public async Task<IEnumerable<IbadahHarianDto>> GetRiwayatPerSiswaAsync(
             int idSiswa,
-            DateTime? startDate,
-            DateTime? endDate)
+            DateOnly? startDate,
+            DateOnly? endDate)
         {
             using var conn = db.Connect();
         
             string sql = @"
                 SELECT 
-                    ih.*,
+                    ih.id AS Id,
+                    ih.id_user AS IdUser,
+                    ih.tanggal AS Tanggal,
+                    ih.membaca_alquran AS MembacaAlquran,
+                    ih.target_bacaan AS TargetBacaan,
                     u.nama AS NamaUser
                 FROM ibadah_harian ih
                 LEFT JOIN users u ON ih.id_user = u.id
@@ -279,6 +308,83 @@ namespace Ramadhan_Digital.Services
         
             return result;
         }
+
+        public async Task<IEnumerable<IbadahHarianDto>> GetMonitoringSiswaSemuaAsync(
+            int idSiswa,
+            DateOnly? startDate,
+            DateOnly? endDate)
+        {
+            using var conn = db.Connect();
+        
+            var sql = @"
+                SELECT 
+                    ih.id AS Id,
+                    ih.id_user AS IdUser,
+                    ih.tanggal AS Tanggal,
+                    ih.membaca_alquran AS MembacaAlquran,
+                    ih.target_bacaan AS TargetBacaan,
+                    u.nama AS NamaUser
+                FROM ibadah_harian ih
+                LEFT JOIN users u ON ih.id_user = u.id
+                WHERE ih.id_user = @IdSiswa
+            ";
+        
+            var parameters = new DynamicParameters();
+            parameters.Add("IdSiswa", idSiswa);
+        
+            if (startDate.HasValue)
+            {
+                sql += " AND ih.tanggal >= @StartDate";
+                parameters.Add("StartDate", startDate.Value);
+            }
+        
+            if (endDate.HasValue)
+            {
+                sql += " AND ih.tanggal <= @EndDate";
+                parameters.Add("EndDate", endDate.Value);
+            }
+        
+            sql += " ORDER BY ih.tanggal DESC;";
+        
+            var result = (await conn.QueryAsync<IbadahHarianDto>(
+                sql,
+                parameters
+            )).ToList();
+        
+            // Ambil detail sholat
+            foreach (var ibadah in result)
+            {
+                string detailSql = @"
+                    SELECT
+                        ds.id AS Id,
+                        ds.id_ibadah_harian AS IdIbadahHarian,
+                        ds.id_kategori_sholat_wajib AS IdKategoriSholatWajib,
+                        ks.nama AS Kategori,
+                        ds.id_status_sholat_wajib AS IdStatusSholatWajib,
+                        ss.nama AS Status
+                    FROM detail_sholat_wajib ds
+                    LEFT JOIN kategori_sholat_wajib ks
+                        ON ds.id_kategori_sholat_wajib = ks.id
+                    LEFT JOIN status_sholat_wajib ss
+                        ON ds.id_status_sholat_wajib = ss.id
+                    WHERE ds.id_ibadah_harian = @IdIbadahHarian
+                    ORDER BY ds.id_kategori_sholat_wajib ASC;
+                ";
+        
+                var details = await conn.QueryAsync<DetailSholatDto>(
+                    detailSql,
+                    new
+                    {
+                        IdIbadahHarian = ibadah.Id
+                    }
+                );
+        
+                ibadah.DetailSholatWajibs = details.ToList();
+            }
+        
+            return result;
+        }
+
 
         
     }

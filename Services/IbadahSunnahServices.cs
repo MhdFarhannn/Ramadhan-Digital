@@ -13,22 +13,22 @@ public class IbadahSunnahServices
     }
 
     // ============================================================
-    // GET SEMUA IBADAH SUNNAH BERDASARKAN USER & TANGGAL
+    // GET IBADAH SUNNAH BERDASARKAN USER & TANGGAL
     // ============================================================
     public async Task<IEnumerable<IbadahSunnah>> GetByUserAndDateAsync(
         int idUser,
-        DateTime tanggal)
+        DateOnly tanggal)
     {
         using var conn = db.Connect();
 
-        string sql = @"
+        const string sql = @"
             SELECT
                 is_s.id AS Id,
                 is_s.id_kategori_sunnah AS IdKategoriSunnah,
                 is_s.id_user AS IdUser,
-                is_s.tanggal::timestamp AS Tanggal,
+                is_s.tanggal AS Tanggal,
 
-                ks.id AS Id,
+                ks.id AS IdKategori,
                 ks.nama AS Nama
             FROM ibadah_sunnah is_s
             INNER JOIN kategori_sunnah ks
@@ -48,9 +48,9 @@ public class IbadahSunnahServices
             new
             {
                 IdUser = idUser,
-                Tanggal = tanggal.Date
+                Tanggal = tanggal
             },
-            splitOn: "Id"
+            splitOn: "IdKategori"
         );
     }
 
@@ -60,7 +60,7 @@ public class IbadahSunnahServices
     // ============================================================
     public async Task<bool> HasSavedTodayAsync(
         int idUser,
-        DateTime tanggal)
+        DateOnly tanggal)
     {
         using var conn = db.Connect();
 
@@ -78,7 +78,7 @@ public class IbadahSunnahServices
             new
             {
                 IdUser = idUser,
-                Tanggal = tanggal.Date
+                Tanggal = tanggal
             }
         );
     }
@@ -89,7 +89,7 @@ public class IbadahSunnahServices
     // ============================================================
     public async Task<SaveIbadahResult> SaveIbadahSunnahAsync(
         int idUser,
-        DateTime tanggal,
+        DateOnly tanggal,
         List<int> idKategoriSunnahList)
     {
         using var conn = db.Connect();
@@ -103,10 +103,8 @@ public class IbadahSunnahServices
 
         try
         {
-            var tanggalOnly = tanggal.Date;
-
             // ====================================================
-            // LOCK BERDASARKAN USER + TANGGAL
+            // LOCK USER + TANGGAL
             // ====================================================
             const string lockSql = @"
                 SELECT pg_advisory_xact_lock(
@@ -119,7 +117,7 @@ public class IbadahSunnahServices
                 new
                 {
                     LockKey =
-                        $"ibadah-sunnah:{idUser}:{tanggalOnly:yyyy-MM-dd}"
+                        $"ibadah-sunnah:{idUser}:{tanggal:yyyy-MM-dd}"
                 },
                 transaction
             );
@@ -142,7 +140,7 @@ public class IbadahSunnahServices
                 new
                 {
                     IdUser = idUser,
-                    Tanggal = tanggalOnly
+                    Tanggal = tanggal
                 },
                 transaction
             );
@@ -156,10 +154,10 @@ public class IbadahSunnahServices
 
 
             // ====================================================
-            // INSERT DATA
+            // INSERT IBADAH SUNNAH
             // ====================================================
             if (idKategoriSunnahList != null &&
-                idKategoriSunnahList.Any())
+                idKategoriSunnahList.Count > 0)
             {
                 const string insertSql = @"
                     INSERT INTO ibadah_sunnah
@@ -185,7 +183,7 @@ public class IbadahSunnahServices
                         {
                             IdKategoriSunnah = idKategori,
                             IdUser = idUser,
-                            Tanggal = tanggalOnly
+                            Tanggal = tanggal
                         },
                         transaction
                     );
@@ -211,18 +209,19 @@ public class IbadahSunnahServices
 
     // ============================================================
     // GET MONITORING IBADAH SUNNAH SISWA
+    // PADA TANGGAL TERTENTU
     //
-    // Semua kategori sunnah akan ditampilkan.
+    // Semua kategori sunnah ditampilkan.
     //
-    // Jika siswa sudah melakukan:
+    // Sudah melakukan:
     //     SudahDilakukan = true
     //
-    // Jika siswa belum melakukan:
+    // Belum melakukan:
     //     SudahDilakukan = false
     // ============================================================
     public async Task<IEnumerable<IbadahSunnahMonitoringDto>> GetByUser(
         int idUser,
-        DateTime tanggal)
+        DateOnly tanggal)
     {
         using var conn = db.Connect();
 
@@ -239,7 +238,7 @@ public class IbadahSunnahServices
 
                 is_s.id AS IdIbadahSunnah,
                 is_s.id_user AS IdUser,
-                is_s.tanggal::timestamp AS Tanggal
+                is_s.tanggal AS Tanggal
 
             FROM kategori_sunnah ks
 
@@ -256,7 +255,43 @@ public class IbadahSunnahServices
             new
             {
                 IdUser = idUser,
-                Tanggal = tanggal.Date
+                Tanggal = tanggal
+            }
+        );
+    }
+
+
+    // ============================================================
+    // GET SELURUH RIWAYAT IBADAH SUNNAH SISWA
+    //
+    // Tidak menggunakan filter tanggal.
+    //
+    // Mengembalikan semua ibadah sunnah yang pernah
+    // dilakukan oleh siswa.
+    // ============================================================
+    public async Task<IEnumerable<IbadahSunnahDto>> GetByUserAsync(
+        int idUser)
+    {
+        using var conn = db.Connect();
+
+        const string sql = @"
+            SELECT
+                is_s.id AS Id,
+                is_s.id_kategori_sunnah AS IdKategoriSunnah,
+                is_s.id_user AS IdUser,
+                is_s.tanggal AS Tanggal
+            FROM ibadah_sunnah is_s
+            WHERE is_s.id_user = @IdUser
+            ORDER BY
+                is_s.tanggal DESC,
+                is_s.id ASC;
+        ";
+
+        return await conn.QueryAsync<IbadahSunnahDto>(
+            sql,
+            new
+            {
+                IdUser = idUser
             }
         );
     }

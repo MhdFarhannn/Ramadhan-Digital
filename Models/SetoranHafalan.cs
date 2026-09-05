@@ -14,7 +14,8 @@
 
         public string? Note { get; set; }
 
-        public DateTime TanggalSetoran { get; set; }
+        // setoran_hafalan.tanggal_setoran -> PostgreSQL date
+        public DateOnly TanggalSetoran { get; set; }
 
 
         public User User { get; set; }

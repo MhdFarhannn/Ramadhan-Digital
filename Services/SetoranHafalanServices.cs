@@ -27,7 +27,7 @@ namespace Ramadhan_Digital.Services
                     sh.id_bacaan_sholat AS IdBacaanSholat,
                     sh.id_status_setoran_hafalan AS IdStatusSetoranHafalan,
                     sh.note AS Note,
-                    sh.tanggal_setoran::timestamp AS TanggalSetoran,
+                    sh.tanggal_setoran AS TanggalSetoran,
 
                     u.id AS UserId,
                     u.*,
@@ -91,7 +91,7 @@ namespace Ramadhan_Digital.Services
                     sh.id_bacaan_sholat AS IdBacaanSholat,
                     sh.id_status_setoran_hafalan AS IdStatusSetoranHafalan,
                     sh.note AS Note,
-                    sh.tanggal_setoran::timestamp AS TanggalSetoran,
+                    sh.tanggal_setoran AS TanggalSetoran,
 
                     u.id AS UserId,
                     u.*,
@@ -155,7 +155,7 @@ namespace Ramadhan_Digital.Services
                     sh.id_bacaan_sholat AS IdBacaanSholat,
                     sh.id_status_setoran_hafalan AS IdStatusSetoranHafalan,
                     sh.note AS Note,
-                    sh.tanggal_setoran::timestamp AS TanggalSetoran,
+                    sh.tanggal_setoran AS TanggalSetoran,
 
                     u.id AS UserId,
                     u.*,
@@ -221,7 +221,7 @@ namespace Ramadhan_Digital.Services
                     sh.id_bacaan_sholat AS IdBacaanSholat,
                     sh.id_status_setoran_hafalan AS IdStatusSetoranHafalan,
                     sh.note AS Note,
-                    sh.tanggal_setoran::timestamp AS TanggalSetoran,
+                    sh.tanggal_setoran AS TanggalSetoran,
 
                     u.id AS UserId,
                     u.*,
@@ -287,7 +287,7 @@ namespace Ramadhan_Digital.Services
                     sh.id_bacaan_sholat AS IdBacaanSholat,
                     sh.id_status_setoran_hafalan AS IdStatusSetoranHafalan,
                     sh.note AS Note,
-                    sh.tanggal_setoran::timestamp AS TanggalSetoran,
+                    sh.tanggal_setoran AS TanggalSetoran,
 
                     s.id AS SurahId,
                     s.*,
@@ -345,7 +345,7 @@ namespace Ramadhan_Digital.Services
                     sh.id_bacaan_sholat AS IdBacaanSholat,
                     sh.id_status_setoran_hafalan AS IdStatusSetoranHafalan,
                     sh.note AS Note,
-                    sh.tanggal_setoran::timestamp AS TanggalSetoran,
+                    sh.tanggal_setoran AS TanggalSetoran,
 
                     bs.id AS BacaanSholatId,
                     bs.*,
