@@ -12,7 +12,9 @@ namespace Ramadhan_Digital.Services
         {
             db = database;
         }
-
+        // ===============
+        // REGISTER ADMIN
+        // ===============
         public async Task<bool> RegisterAdmin(User user)
         {
             using var conn = db.Connect();
@@ -46,6 +48,10 @@ namespace Ramadhan_Digital.Services
 
             return count > 0;
         }
+
+        // ===============
+        // LOGIN
+        // ===============
 
         public async Task<User?> Login(string username)
         {
@@ -83,7 +89,7 @@ namespace Ramadhan_Digital.Services
             });
             return result > 0;
         }
-
+        
         public async Task<bool> registerGuru(User user)
         {
             using var conn = db.Connect();
@@ -96,6 +102,7 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, new
             {
                 IdRole = 2,
+                Kelas = 10,
                 Nama = user.Nama,
                 Username = user.Username,
                 Password = user.Password
@@ -103,6 +110,9 @@ namespace Ramadhan_Digital.Services
             return result > 0;
         }
 
+        // ===============
+        // REGISTER SISWA
+        // ===============
         public async Task<bool> RegisterSiswa(User user)
         {
             using var conn = db.Connect();
@@ -125,6 +135,10 @@ namespace Ramadhan_Digital.Services
             return result > 0;
         }
 
+        // ===============
+        // REGISTER GURU
+        // ===============
+        
         public async Task<bool> RegisterGuru(User user)
         {
             using var conn = db.Connect();
@@ -138,7 +152,7 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, new
             {
                 IdRole = 2, // Role ID untuk Guru
-                IdKelas = 5, // ID Kelas default
+                IdKelas = 10, // ID Kelas default
                 Nama = user.Nama,
                 Username = user.Username,
                 Password = user.Password
@@ -166,7 +180,7 @@ namespace Ramadhan_Digital.Services
             int result = await conn.ExecuteAsync(sql, new { id });
             return result > 0;
         }
-
+        
         //PUT KELAS GURU
         public async Task<bool> UpdateKelasGuru(int id, int idKelas)
         {
@@ -204,6 +218,71 @@ namespace Ramadhan_Digital.Services
             return await conn.QueryAsync<UserDTO>(sql);
         }
 
+        public async Task<bool> UpdateUser(
+            int id,
+            string? nama,
+            string? username,
+            int? idKelas,
+            string? password,
+            IPasswordService passwordService)
+        {
+            using var conn = db.Connect();
         
+            var updates = new List<string>();
+            var parameters = new DynamicParameters();
+        
+            parameters.Add("id", id);
+        
+            // Update nama jika dikirim
+            if (!string.IsNullOrWhiteSpace(nama))
+            {
+                updates.Add("nama = @nama");
+                parameters.Add("nama", nama);
+            }
+        
+            // Update username jika dikirim
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                updates.Add("username = @username");
+                parameters.Add("username", username);
+            }
+        
+            // Update kelas jika dikirim
+            if (idKelas.HasValue)
+            {
+                updates.Add("id_kelas = @idKelas");
+                parameters.Add("idKelas", idKelas.Value);
+            }
+        
+            // Update password jika dikirim
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                var hashedPassword = passwordService.HashPassword(password);
+        
+                updates.Add("password = @password");
+                parameters.Add("password", hashedPassword);
+            }
+        
+            // Tidak ada id_role di sini.
+            // Jadi id_role tidak dapat diubah melalui PATCH.
+        
+            if (updates.Count == 0)
+            {
+                return false;
+            }
+        
+            string sql = $"""
+                UPDATE users
+                SET {string.Join(", ", updates)}
+                WHERE id = @id
+                """;
+        
+            int result = await conn.ExecuteAsync(sql, parameters);
+        
+            return result > 0;
+        }
+
+
+
     }
 }

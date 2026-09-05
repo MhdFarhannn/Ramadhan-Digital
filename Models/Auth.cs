@@ -46,6 +46,14 @@ namespace Ramadhan_Digital.Models
         public int IdKelas { get; set; }
     }
 
+    public class UpdateUserRequest
+    {
+        public string Nama { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public int IdKelas { get; set; }
+        public string Password { get; set; } = string.Empty;
+    }
+
 
     public static class Policies
     {

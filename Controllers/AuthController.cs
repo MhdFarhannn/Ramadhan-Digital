@@ -453,7 +453,48 @@ namespace Ramadhan_Digital.Controllers
                         statusCode: StatusCodes.Status500InternalServerError);
                 }
             }).WithName("GetAllGuru");
+
+            adminGroup.MapPatch("/users/{id:int}", async (
+                int id,
+                UpdateUserRequest request,
+                AuthServices services,
+                IPasswordService passwordService) =>
+            {
+                try
+                {
+                    var result = await services.UpdateUser(
+                        id,
+                        request.Nama,
+                        request.Username,
+                        request.IdKelas,
+                        request.Password,
+                        passwordService
+                    );
             
+                    if (result)
+                    {
+                        return Results.Ok(new
+                        {
+                            message = "User updated successfully."
+                        });
+                    }
+            
+                    return Results.NotFound(new
+                    {
+                        message = "User not found or no data to update."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(
+                        title: "Internal Server Error",
+                        detail: ex.Message,
+                        statusCode: StatusCodes.Status500InternalServerError
+                    );
+                }
+            })
+            .WithName("UpdateUser");
+
         }
     }
 }
