@@ -32,6 +32,7 @@
     {
         public int Id { get; set; }
         public string Role { get; set; }
+        public int? IdKelas { get; set; }
         public string Kelas { get; set; }
         public string Nama { get; set; }
         public string Username { get; set; }

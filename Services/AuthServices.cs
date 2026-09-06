@@ -195,7 +195,7 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
             string sql = @"
-        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas
+        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas, u.id_kelas AS IdKelas
         FROM users u
         LEFT JOIN role r ON u.id_role = r.id
         LEFT JOIN kelas k ON u.id_kelas = k.id
@@ -209,7 +209,7 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
             string sql = @"
-        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas
+        SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas, u.id_kelas AS IdKelas
         FROM users u
         LEFT JOIN role r ON u.id_role = r.id
         LEFT JOIN kelas k ON u.id_kelas = k.id
