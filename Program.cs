@@ -43,8 +43,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:4200",
                 "http://192.168.69.50:5173",
                 "http://192.168.69.50:5174",
-                "https://yourdomain.com"
-            )
+                "https://frequencies-veterans-warrior-affected.trycloudflare.com",
+                "https://reproduction-freeware-snow-matthew.trycloudflare.com"            )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
