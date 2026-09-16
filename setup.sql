@@ -1065,6 +1065,53 @@ COPY public.dzikir_setelah_sholat (id, nama, arabic, terjemah, sumber) FROM stdi
 --
 
 --
+-- Data for Name: surah; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Standard Juz 30 (Juz 'Amma) reference metadata, id order matches id_surah
+-- values used in the ayat data below (verse counts confirmed to match).
+--
+
+COPY public.surah (id, surah, artisurat, tempat_turun, nomor) FROM stdin;
+1	An-Naba'	Berita Besar	Makkiyah	78
+2	An-Nazi'at	Malaikat-Malaikat yang Mencabut	Makkiyah	79
+3	'Abasa	Ia Bermuka Masam	Makkiyah	80
+4	At-Takwir	Menggulung	Makkiyah	81
+5	Al-Infitar	Terbelah	Makkiyah	82
+6	Al-Mutaffifin	Orang-Orang yang Curang	Makkiyah	83
+7	Al-Insyiqaq	Terbelah	Makkiyah	84
+8	Al-Buruj	Gugusan Bintang	Makkiyah	85
+9	At-Tariq	Yang Datang di Malam Hari	Makkiyah	86
+10	Al-A'la	Yang Paling Tinggi	Makkiyah	87
+11	Al-Gasyiyah	Hari Pembalasan	Makkiyah	88
+12	Al-Fajr	Fajar	Makkiyah	89
+13	Al-Balad	Negeri	Makkiyah	90
+14	Asy-Syams	Matahari	Makkiyah	91
+15	Al-Lail	Malam	Makkiyah	92
+16	Ad-Duha	Waktu Duha	Makkiyah	93
+17	Asy-Syarh	Melapangkan	Makkiyah	94
+18	At-Tin	Buah Tin	Makkiyah	95
+19	Al-'Alaq	Segumpal Darah	Makkiyah	96
+20	Al-Qadr	Kemuliaan	Makkiyah	97
+21	Al-Bayyinah	Bukti Nyata	Madaniyah	98
+22	Az-Zalzalah	Guncangan	Madaniyah	99
+23	Al-'Adiyat	Kuda Perang yang Berlari Kencang	Makkiyah	100
+24	Al-Qari'ah	Hari Kiamat	Makkiyah	101
+25	At-Takasur	Bermegah-megahan	Makkiyah	102
+26	Al-'Asr	Masa	Makkiyah	103
+27	Al-Humazah	Pengumpat	Makkiyah	104
+28	Al-Fil	Gajah	Makkiyah	105
+29	Quraisy	Suku Quraisy	Makkiyah	106
+30	Al-Ma'un	Barang-Barang yang Berguna	Makkiyah	107
+31	Al-Kausar	Nikmat yang Berlimpah	Makkiyah	108
+32	Al-Kafirun	Orang-Orang Kafir	Makkiyah	109
+33	An-Nasr	Pertolongan	Madaniyah	110
+34	Al-Lahab	Gejolak Api	Makkiyah	111
+35	Al-Ikhlas	Memurnikan Keesaan Allah	Makkiyah	112
+36	Al-Falaq	Waktu Subuh	Makkiyah	113
+37	An-Nas	Manusia	Makkiyah	114
+\.
+
+
+--
 -- Data for Name: ayat; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1642,71 +1689,81 @@ COPY public.ayat (id, id_surah, nomor, arab, terjemah) FROM stdin;
 \.
 
 
---
--- Data for Name: detail_sholat_wajib; Type: TABLE DATA; Schema: public; Owner: postgres
---
+-- DISABLED: references id_ibadah_harian values not present in this dump
+-- (real per-user daily worship logs, not included in either source file).
+-- Uncomment and run only after loading the matching public.ibadah_harian rows.
+-- --
+-- -- Data for Name: detail_sholat_wajib; Type: TABLE DATA; Schema: public; Owner: postgres
+-- --
 
-COPY public.detail_sholat_wajib (id, id_ibadah_harian, id_kategori_sholat_wajib, id_status_sholat_wajib) FROM stdin;
-1	1	1	1
-2	1	2	1
-3	1	3	2
-4	1	4	1
-5	1	5	1
-6	8	1	1
-7	8	2	1
-8	8	3	1
-9	8	4	1
-10	8	5	1
-20	19	1	1
-21	19	2	1
-22	19	3	1
-23	19	4	1
-24	19	5	1
-25	20	1	1
-26	20	2	1
-27	20	3	1
-28	20	4	1
-29	20	5	1
-30	21	1	1
-31	21	2	1
-32	21	3	1
-33	21	4	1
-34	21	5	1
-35	22	1	1
-36	22	2	1
-37	22	3	1
-38	22	4	1
-39	22	5	1
-40	23	1	2
-41	23	2	3
-42	23	3	1
-43	23	4	1
-44	23	5	1
-45	24	1	1
-46	24	2	1
-47	24	3	1
-48	24	4	1
-49	24	5	1
-52	26	1	1
-53	26	2	1
-54	26	3	1
-55	26	4	1
-56	26	5	1
-57	27	1	1
-58	27	2	1
-59	27	3	1
-60	27	4	1
-61	27	5	1
-62	28	1	1
-63	28	2	1
-64	28	3	1
-65	28	4	1
-66	28	5	1
-\.
+-- COPY public.detail_sholat_wajib (id, id_ibadah_harian, id_kategori_sholat_wajib, id_status_sholat_wajib) FROM stdin;
+-- 1	1	1	1
+-- 2	1	2	1
+-- 3	1	3	2
+-- 4	1	4	1
+-- 5	1	5	1
+-- 6	8	1	1
+-- 7	8	2	1
+-- 8	8	3	1
+-- 9	8	4	1
+-- 10	8	5	1
+-- 20	19	1	1
+-- 21	19	2	1
+-- 22	19	3	1
+-- 23	19	4	1
+-- 24	19	5	1
+-- 25	20	1	1
+-- 26	20	2	1
+-- 27	20	3	1
+-- 28	20	4	1
+-- 29	20	5	1
+-- 30	21	1	1
+-- 31	21	2	1
+-- 32	21	3	1
+-- 33	21	4	1
+-- 34	21	5	1
+-- 35	22	1	1
+-- 36	22	2	1
+-- 37	22	3	1
+-- 38	22	4	1
+-- 39	22	5	1
+-- 40	23	1	2
+-- 41	23	2	3
+-- 42	23	3	1
+-- 43	23	4	1
+-- 44	23	5	1
+-- 45	24	1	1
+-- 46	24	2	1
+-- 47	24	3	1
+-- 48	24	4	1
+-- 49	24	5	1
+-- 52	26	1	1
+-- 53	26	2	1
+-- 54	26	3	1
+-- 55	26	4	1
+-- 56	26	5	1
+-- 57	27	1	1
+-- 58	27	2	1
+-- 59	27	3	1
+-- 60	27	4	1
+-- 61	27	5	1
+-- 62	28	1	1
+-- 63	28	2	1
+-- 64	28	3	1
+-- 65	28	4	1
+-- 66	28	5	1
+-- \.
 
 
 --
 -- Sequence values — from ramadhan_schema.sql (only for sequences with loaded data)
+--
+-- Name: surah_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.surah_id_seq', 37, true);
+
+
 --
 
 --
@@ -1779,11 +1836,7 @@ SELECT pg_catalog.setval('public.dzikir_setelah_sholat_id_seq', 20, true);
 SELECT pg_catalog.setval('public.ayat_id_seq', 571, true);
 
 
---
--- Name: detail_sholat_wajib_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.detail_sholat_wajib_id_seq', 66, true);
+-- DISABLED (see note above): SELECT pg_catalog.setval('public.detail_sholat_wajib_id_seq', 66, true);
 
 
 --
