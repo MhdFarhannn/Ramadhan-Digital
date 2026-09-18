@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public string Nama { get; set; }
         public string Angkatan { get; set; }
+        public string? DeleteAt { get; set; }
 
         public ICollection<User> Users { get; set; }
     }

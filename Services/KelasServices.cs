@@ -20,6 +20,7 @@ namespace Ramadhan_Digital.Services
                     nama AS Nama,
                     angkatan AS Angkatan
                 FROM kelas
+                WHERE deleteat IS NULL
                 ORDER BY id ASC
             ";
             return await conn.QueryAsync<Kelas>(sql);
@@ -34,7 +35,7 @@ namespace Ramadhan_Digital.Services
                     nama AS Nama,
                     angkatan AS Angkatan
                 FROM kelas
-                WHERE id = @Id
+                WHERE id = @Id AND deleteat IS NULL
             ";
             return await conn.QueryFirstOrDefaultAsync<Kelas>(
                 sql,
@@ -70,10 +71,18 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
             string sql = @"
-                DELETE FROM kelas
-                WHERE id = @Id
+                UPDATE kelas
+                SET deleteat = @DeleteAt
+                WHERE id = @Id AND deleteat IS NULL
             ";
-            var result = await conn.ExecuteAsync(sql, new { Id = id });
+            var result = await conn.ExecuteAsync(
+                sql,
+                new
+                {
+                    Id = id,
+                    DeleteAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                }
+            );
             return result > 0;
         }
 

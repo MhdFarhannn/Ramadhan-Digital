@@ -26,6 +26,7 @@ namespace Ramadhan_Digital.Services
                     pemateri AS Pemateri,
                     tanggal AS Tanggal
                 FROM kegiatan
+                WHERE deleteat IS NULL
                 ORDER BY tanggal DESC;
             ";
 
@@ -47,7 +48,7 @@ namespace Ramadhan_Digital.Services
                     pemateri AS Pemateri,
                     tanggal AS Tanggal
                 FROM kegiatan
-                WHERE id = @Id;
+                WHERE id = @Id AND deleteat IS NULL;
             ";
 
             return await conn.QueryFirstOrDefaultAsync<Kegiatan>(
@@ -162,6 +163,7 @@ namespace Ramadhan_Digital.Services
                     ON ku.id_kegiatan = k.id
 
                 WHERE ku.id_user = @IdUser
+                    AND k.deleteat IS NULL
 
                 ORDER BY k.tanggal DESC;
             ";
@@ -190,15 +192,17 @@ namespace Ramadhan_Digital.Services
             using var conn = db.Connect();
 
             const string sql = @"
-                DELETE FROM kegiatan
-                WHERE id = @Id;
+                UPDATE kegiatan
+                SET deleteat = @DeleteAt
+                WHERE id = @Id AND deleteat IS NULL;
             ";
 
             var result = await conn.ExecuteAsync(
                 sql,
                 new
                 {
-                    Id = id
+                    Id = id,
+                    DeleteAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                 }
             );
 

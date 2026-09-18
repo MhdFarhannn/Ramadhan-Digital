@@ -11,6 +11,8 @@
         // kegiatan.tanggal -> PostgreSQL date
         public DateOnly Tanggal { get; set; }
 
+        public string? DeleteAt { get; set; }
+
 
         public ICollection<KegiatanUser> KegiatanUsers { get; set; }
     }
