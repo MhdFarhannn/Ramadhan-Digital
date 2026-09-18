@@ -42,7 +42,7 @@ namespace Ramadhan_Digital.Services
         {
             using var conn = db.Connect();
 
-            string sql = "SELECT COUNT(*) FROM users";
+            string sql = "SELECT COUNT(*) FROM users WHERE deleteat IS NULL";
 
             int count = await conn.ExecuteScalarAsync<int>(sql);
 
@@ -63,7 +63,7 @@ namespace Ramadhan_Digital.Services
  FROM users u
  JOIN role r ON u.id_role = r.id
  JOIN kelas k ON u.id_kelas = k.id
- WHERE u.username = @username
+ WHERE u.username = @username AND u.deleteat IS NULL
 ";
 
             var ReturnUser = await conn.QueryFirstOrDefaultAsync<User>(sql, new { username = username });
@@ -168,7 +168,8 @@ namespace Ramadhan_Digital.Services
         SELECT u.id, u.nama, u.username, r.Name AS Role, k.Nama AS Kelas
         FROM users u
         LEFT JOIN role r ON u.id_role = r.id
-        LEFT JOIN kelas k ON u.id_kelas = k.id;
+        LEFT JOIN kelas k ON u.id_kelas = k.id
+        WHERE u.deleteat IS NULL;
     ";
             return await conn.QueryAsync<UserDTO>(sql);
         }
@@ -176,8 +177,16 @@ namespace Ramadhan_Digital.Services
         public async Task<bool> DeleteUser(int id)
         {
             using var conn = db.Connect();
-            string sql = "DELETE FROM users WHERE id = @id";
-            int result = await conn.ExecuteAsync(sql, new { id });
+            string sql = @"
+                UPDATE users
+                SET deleteat = @deleteAt
+                WHERE id = @id AND deleteat IS NULL;
+            ";
+            int result = await conn.ExecuteAsync(sql, new
+            {
+                id,
+                deleteAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            });
             return result > 0;
         }
         
@@ -199,7 +208,7 @@ namespace Ramadhan_Digital.Services
         FROM users u
         LEFT JOIN role r ON u.id_role = r.id
         LEFT JOIN kelas k ON u.id_kelas = k.id
-        WHERE u.id_role = 3;
+        WHERE u.id_role = 3 AND u.deleteat IS NULL;
     ";
             return await conn.QueryAsync<UserDTO>(sql);
         }
@@ -213,7 +222,7 @@ namespace Ramadhan_Digital.Services
         FROM users u
         LEFT JOIN role r ON u.id_role = r.id
         LEFT JOIN kelas k ON u.id_kelas = k.id
-        WHERE u.id_role = 2;
+        WHERE u.id_role = 2 AND u.deleteat IS NULL;
     ";
             return await conn.QueryAsync<UserDTO>(sql);
         }

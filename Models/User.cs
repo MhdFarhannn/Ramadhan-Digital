@@ -12,6 +12,7 @@
         public string Password { get; set; }
         public string Role { get; set; }
         public string Kelas { get; set; }
+        public string? DeleteAt { get; set; }
 
 
 
