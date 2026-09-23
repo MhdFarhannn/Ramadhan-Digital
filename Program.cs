@@ -245,8 +245,8 @@ else
 // ================================================================
 
 app.MapGet(
-    "/ping",
-    () => Results.Ok("pong")
+    "/api/v1/health",
+    () => Results.Ok("Server running")
 )
 .AllowAnonymous();
 

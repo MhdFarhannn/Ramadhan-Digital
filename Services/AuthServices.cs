@@ -7,10 +7,11 @@ namespace Ramadhan_Digital.Services
     public class AuthServices
     {
         private readonly Database db;
-
-        public AuthServices(Database database)
+        private readonly IConfiguration _configuration;
+        public AuthServices(Database database,IConfiguration configuration)
         {
             db = database;
+            _configuration = configuration
         }
         // ===============
         // REGISTER ADMIN
@@ -93,6 +94,7 @@ namespace Ramadhan_Digital.Services
         public async Task<bool> registerGuru(User user)
         {
             using var conn = db.Connect();
+            int defaultIdKelas = _configuration.GetValue<int>("TeacherSettings:DefaultIdKelas");
             string sql = @"
                 INSERT INTO users
                 (id_role, nama, username, password)
@@ -102,7 +104,7 @@ namespace Ramadhan_Digital.Services
             var result = await conn.ExecuteAsync(sql, new
             {
                 IdRole = 2,
-                Kelas = 10,
+                Kelas = defaultIdKelas,
                 Nama = user.Nama,
                 Username = user.Username,
                 Password = user.Password
@@ -142,6 +144,7 @@ namespace Ramadhan_Digital.Services
         public async Task<bool> RegisterGuru(User user)
         {
             using var conn = db.Connect();
+            int defaultIdKelas = _configuration.GetValue<int>("TeacherSettings:DefaultIdKelas");
             string sql = @"
         INSERT INTO users
         (id_role, id_kelas, nama, username, password)
@@ -151,8 +154,9 @@ namespace Ramadhan_Digital.Services
 
             var result = await conn.ExecuteAsync(sql, new
             {
+            
                 IdRole = 2, // Role ID untuk Guru
-                IdKelas = 10, // ID Kelas default
+                IdKelas =defaultIdKelas , // ID Kelas default
                 Nama = user.Nama,
                 Username = user.Username,
                 Password = user.Password
