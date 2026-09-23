@@ -11,7 +11,7 @@ namespace Ramadhan_Digital.Services
         public AuthServices(Database database,IConfiguration configuration)
         {
             db = database;
-            _configuration = configuration
+            _configuration = configuration;
         }
         // ===============
         // REGISTER ADMIN
